@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>▓▒░ SECTION 9 — INTERFACE OPÉRATEUR ░▒▓</title>
+
+<style>
+:root {
+  --bg: #0a0f0a;
+  --surface: #0d120d;
+  --panel: rgba(10,20,10,0.95);
+  --terminal: #0a0a08;
+  --green: #00ff41;
+  --green-dim: #00aa2a;
+  --amber: #ffb000;
+  --red: #ff3333;
+  --cyan: #00ffff;
+  --text: #c0c0b0;
+  --muted: #606858;
+  --border: rgba(0,255,65,0.2);
+  --glow: rgba(0,255,65,0.15);
+  --font-main: 'Courier New', Courier, monospace;
+  --font-display: 'Lucida Console', Monaco, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* CRT Effect */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px),
+    radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+  z-index: 10000;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(0,255,65,0.03), transparent 70%);
+  animation: flicker 0.15s infinite;
+  z-index: 9999;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+}
+
+/* ═══════════════ HEADER ═══════════════ */
+header {
+  background: linear-gradient(180deg, rgba(0,30,0,0.9), var(--surface));
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 0 30px var(--glow);
+  position: relative;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-box {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--green);
+  background: var(--terminal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 0 10px var(--glow), inset 0 0 10px var(--glow); }
+  50% { box-shadow: 0 0 20px var(--green), inset 0 0 15px var(--glow); }
+}
+
+.logo-box::before {
+  content: "§9";
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--green);
+  text-shadow: 0 0 10px var(--green);
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title-main {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--green);
+  text-shadow: 0 0 10px var(--glow);
+  letter-spacing: 0.2em;
+}
+
+.title-sub {
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.3em;
+}
+
+.header-status {
+  display: flex;
+  gap: 20px;
+  font-size: 0.7rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: blink 2s infinite;
+}
+
+.status-dot.amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+.status-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red); animation: blink 0.5s infinite; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.header-time {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--amber);
+  text-shadow: 0 0 5px var(--amber);
+}
+
+.classification {
+  background: var(--red);
+  color: #000;
+  padding: 2px 8px;
+  font-size: 0.6rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  animation: classificationPulse 1s infinite;
+}
+
+@keyframes classificationPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ═══════════════ MAIN GRID ═══════════════ */
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr 260px;
+  gap: 8px;
+  padding: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  main { grid-template-columns: 240px 1fr; }
+  .panel-right { display: none; }
+}
+
+@media (max-width: 768px) {
+  main { grid-template-columns: 1fr; }
+  .panel-left { display: none; }
+}
+
+/* ═══════════════ PANELS ═══════════════ */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+}
+
+.panel-header {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,255,65,0.03);
+}
+
+.panel-title {
+  font-size: 0.7rem;
+  color: var(--green);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.panel-badge {
+  font-size: 0.6rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* ═══════════════ DOSSIERS LIST ═══════════════ */
+.dossier-item {
+  background: rgba(0,20,0,0.5);
+  border: 1px solid rgba(0,255,65,0.1);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.dossier-item:hover {
+  border-color: var(--green);
+  background: rgba(0,255,65,0.05);
+}
+
+.dossier-item.active {
+  border-color: var(--green);
+  box-shadow: 0 0 15px var(--glow), inset 0 0 20px var(--glow);
+}
+
+.dossier-item.classified::before {
+  content: "█";
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  color: var(--red);
+  font-size: 0.6rem;
+}
+
+.dossier-code {
+  font-size: 0.6rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.dossier-name {
+  font-size: 0.75rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.dossier-status {
+  font-size: 0.6rem;
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid;
+}
+
+.dossier-status.active { border-color: var(--green); color: var(--green); }
+.dossier-status.pending { border-color: var(--amber); color: var(--amber); }
+.dossier-status.closed { border-color: var(--muted); color: var(--muted); }
+
+/* ═══════════════ CONSOLE ═══════════════ */
+.console-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.console-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,20,0,0.3);
+}
+
+.console-tab {
+  padding: 8px 16px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.console-tab:hover { color: var(--text); }
+.console-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+  background: rgba(0,255,65,0.05);
+}
+
+.console-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.console-output {
+  flex: 1;
+  background: var(--terminal);
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+
+.console-line {
+  margin-bottom: 4px;
+  word-wrap: break-word;
+}
+
+.console-line.system { color: var(--cyan); }
+.console-line.error { color: var(--red); }
+.console-line.success { color: var(--green); }
+.console-line.warning { color: var(--amber); }
+.console-line.input { color: var(--green); }
+.console-line.input::before { content: "› "; color: var(--green-dim); }
+.console-line.ascii { color: var(--green-dim); white-space: pre; font-size: 0.65rem; }
+
+.console-input-row {
+  display: flex;
+  align-items: center;
+  background: rgba(0,20,0,0.5);
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+.console-prompt {
+  color: var(--green);
+  font-size: 0.8rem;
+}
+
+.console-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--green);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  outline: none;
+  caret-color: var(--green);
+}
+
+.console-input::placeholder { color: var(--muted); }
+
+/* ═══════════════ MANUAL TAB ═══════════════ */
+.manual-content {
+  padding: 12px;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.manual-section {
+  margin-bottom: 16px;
+}
+
+.manual-section h3 {
+  color: var(--green);
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cmd-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+  padding: 4px 0;
+}
+
+.cmd-name {
+  color: var(--amber);
+  min-width: 100px;
+  font-weight: bold;
+}
+
+.cmd-desc { color: var(--text); }
+
+.manual-note {
+  background: rgba(255,176,0,0.1);
+  border-left: 2px solid var(--amber);
+  padding: 8px;
+  margin-top: 12px;
+  font-size: 0.68rem;
+  color: var(--amber);
+}
+
+/* ═══════════════ RIGHT PANEL ═══════════════ */
+.agents-list {
+  margin-bottom: 12px;
+}
+
+.agent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(0,20,0,0.3);
+  margin-bottom: 4px;
+  border: 1px solid rgba(0,255,65,0.1);
+}
+
+.agent-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+.agent-status.offline { background: var(--muted); box-shadow: none; }
+.agent-status.busy { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+.agent-name {
+  flex: 1;
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.agent-code {
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.quick-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.tool-btn {
+  background: rgba(0,20,0,0.5);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 8px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.tool-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 10px var(--glow);
+}
+
+.tool-btn .icon {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.intel-feed {
+  margin-top: 12px;
+}
+
+.intel-item {
+  font-size: 0.65rem;
+  padding: 6px 8px;
+  border-left: 2px solid var(--green-dim);
+  margin-bottom: 6px;
+  background: rgba(0,20,0,0.3);
+}
+
+.intel-item.alert { border-left-color: var(--amber); }
+.intel-item.critical { border-left-color: var(--red); }
+
+.intel-time {
+  color: var(--muted);
+  font-size: 0.6rem;
+}
+
+.intel-text {
+  color: var(--text);
+  margin-top: 2px;
+}
+
+/* ═══════════════ FOOTER ═══════════════ */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 6px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.footer-left { display: flex; gap: 20px; }
+.footer-sig {
+  color: var(--green-dim);
+  font-style: italic;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--terminal); }
+::-webkit-scrollbar-thumb { background: var(--green-dim); }
+::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+/* Hidden content */
+.hidden { display: none !important; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-box"></div>
+    <div class="header-title">
+      <div class="title-main">SECTION 9</div>
+      <div class="title-sub">INTERFACE OPÉRATEUR v3.7.2</div>
+    </div>
+  </div>
+  
+  <div class="header-status">
+    <div class="status-item">
+      <span class="status-dot"></span>
+      <span>SYSTÈME</span>
+    </div>
+    <div class="status-item">
+      <span class="status-dot amber"></span>
+      <span>RÉSEAU</span>
+    </div>
+    <div class="status-item">
+      <span class="status-dot"></span>
+      <span>CRYPTO</span>
+    </div>
+  </div>
+  
+  <div class="header-time" id="clock">--:--:--</div>
+  
+  <div class="classification">TOP SECRET // ORCON</div>
+</header>
+
+<main>
+  <!-- PANEL GAUCHE: DOSSIERS -->
+  <section class="panel panel-left">
+    <div class="panel-header">
+      <span class="panel-title">◢ Dossiers actifs</span>
+      <span class="panel-badge" id="dossierCount">--</span>
+    </div>
+    <div class="panel-content" id="dossierList"></div>
+  </section>
+  
+  <!-- PANEL CENTRAL: CONSOLE -->
+  <section class="panel console-panel">
+    <div class="console-tabs">
+      <button class="console-tab active" data-tab="console">CONSOLE</button>
+      <button class="console-tab" data-tab="manual">MANUEL</button>
+      <button class="console-tab" data-tab="comms">COMMS</button>
+      <button class="console-tab" data-tab="crypto">CRYPTO</button>
+    </div>
+    
+    <div class="console-body" id="tabConsole">
+      <div class="console-output" id="consoleOutput"></div>
+      <div class="console-input-row">
+        <span class="console-prompt">SECTION9&gt;</span>
+        <input type="text" class="console-input" id="consoleInput" placeholder="Entrez une commande... (tapez 'help' pour l'aide)" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    
+    <div class="console-body hidden" id="tabManual">
+      <div class="manual-content">
+        <div class="manual-section">
+          <h3>▸ COMMANDES SYSTÈME</h3>
+          <div class="cmd-row"><span class="cmd-name">help</span><span class="cmd-desc">Affiche cette aide</span></div>
+          <div class="cmd-row"><span class="cmd-name">clear / cls</span><span class="cmd-desc">Efface la console</span></div>
+          <div class="cmd-row"><span class="cmd-name">status</span><span class="cmd-desc">État du système</span></div>
+          <div class="cmd-row"><span class="cmd-name">whoami</span><span class="cmd-desc">Identité de l'opérateur</span></div>
+          <div class="cmd-row"><span class="cmd-name">uptime</span><span class="cmd-desc">Temps de session</span></div>
+          <div class="cmd-row"><span class="cmd-name">date</span><span class="cmd-desc">Date et heure système</span></div>
+        </div>
+        
+        <div class="manual-section">
+          <h3>▸ DOSSIERS & MISSIONS</h3>
+          <div class="cmd-row"><span class="cmd-name">list</span><span class="cmd-desc">Liste tous les dossiers</span></div>
+          <div class="cmd-row"><span class="cmd-name">open [code]</span><span class="cmd-desc">Ouvre un dossier</span></div>
+          <div class="cmd-row"><span class="cmd-name">close</span><span class="cmd-desc">Ferme le dossier actif</span></div>
+          <div class="cmd-row"><span class="cmd-name">mission</span><span class="cmd-desc">Affiche la mission en cours</span></div>
+          <div class="cmd-row"><span class="cmd-name">brief [code]</span><span class="cmd-desc">Briefing d'une mission</span></div>
+          <div class="cmd-row"><span class="cmd-name">log [texte]</span><span class="cmd-desc">Ajoute une entrée au journal</span></div>
+        </div>
+        
+        <div class="manual-section">
+          <h3>▸ AGENTS & COMMUNICATIONS</h3>
+          <div class="cmd-row"><span class="cmd-name">agents</span><span class="cmd-desc">Liste des agents actifs</span></div>
+          <div class="cmd-row"><span class="cmd-name">ping [agent]</span><span class="cmd-desc">Vérifie le statut d'un agent</span></div>
+          <div class="cmd-row"><span class="cmd-name">msg [agent] [txt]</span><span class="cmd-desc">Envoie un message</span></div>
+          <div class="cmd-row"><span class="cmd-name">broadcast [txt]</span><span class="cmd-desc">Message à tous les agents</span></div>
+        </div>
+        
+        <div class="manual-section">
+          <h3>▸ CRYPTOGRAPHIE</h3>
+          <div class="cmd-row"><span class="cmd-name">encrypt [txt]</span><span class="cmd-desc">Chiffre un message (ROT13+)</span></div>
+          <div class="cmd-row"><span class="cmd-name">decrypt [txt]</span><span class="cmd-desc">Déchiffre un message</span></div>
+          <div class="cmd-row"><span class="cmd-name">hash [txt]</span><span class="cmd-desc">Génère un hash</span></div>
+          <div class="cmd-row"><span class="cmd-name">keygen</span><span class="cmd-desc">Génère une clé aléatoire</span></div>
+          <div class="cmd-row"><span class="cmd-name">b64 [txt]</span><span class="cmd-desc">Encode en Base64</span></div>
+          <div class="cmd-row"><span class="cmd-name">unb64 [txt]</span><span class="cmd-desc">Décode du Base64</span></div>
+        </div>
+        
+        <div class="manual-section">
+          <h3>▸ OUTILS AVANCÉS</h3>
+          <div class="cmd-row"><span class="cmd-name">scan [cible]</span><span class="cmd-desc">Analyse une cible</span></div>
+          <div class="cmd-row"><span class="cmd-name">trace [id]</span><span class="cmd-desc">Trace un identifiant</span></div>
+          <div class="cmd-row"><span class="cmd-name">lookup [terme]</span><span class="cmd-desc">Recherche dans la base</span></div>
+          <div class="cmd-row"><span class="cmd-name">export</span><span class="cmd-desc">Exporte les données</span></div>
+          <div class="cmd-row"><span class="cmd-name">timer [sec]</span><span class="cmd-desc">Lance un compte à rebours</span></div>
+          <div class="cmd-row"><span class="cmd-name">dice [n]d[faces]</span><span class="cmd-desc">Lance des dés (ex: 2d6)</span></div>
+        </div>
+        
+        <div class="manual-section">
+          <h3>▸ NAVIGATION</h3>
+          <div class="cmd-row"><span class="cmd-name">goto [url]</span><span class="cmd-desc">Ouvre une URL</span></div>
+          <div class="cmd-row"><span class="cmd-name">note [txt]</span><span class="cmd-desc">Crée une note rapide</span></div>
+          <div class="cmd-row"><span class="cmd-name">notes</span><span class="cmd-desc">Affiche les notes</span></div>
+          <div class="cmd-row"><span class="cmd-name">delnote [n]</span><span class="cmd-desc">Supprime une note</span></div>
+        </div>
+        
+        <div class="manual-note">
+          ⚠ NIVEAU D'ACCÈS: Certaines commandes requièrent une habilitation supérieure.<br>
+          Tapez <strong>clearance</strong> pour vérifier votre niveau d'accès actuel.
+        </div>
+      </div>
+    </div>
+    
+    <div class="console-body hidden" id="tabComms">
+      <div class="manual-content">
+        <div class="manual-section">
+          <h3>▸ CANAL SÉCURISÉ</h3>
+          <div id="commsLog" style="background:var(--terminal);padding:10px;min-height:200px;margin-bottom:10px;font-size:0.7rem;"></div>
+          <input type="text" id="commsInput" placeholder="Message..." style="width:100%;background:var(--terminal);border:1px solid var(--border);color:var(--green);padding:8px;font-family:var(--font-main);">
+        </div>
+      </div>
+    </div>
+    
+    <div class="console-body hidden" id="tabCrypto">
+      <div class="manual-content">
+        <div class="manual-section">
+          <h3>▸ MODULE CRYPTOGRAPHIQUE</h3>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:4px;">ENTRÉE:</label>
+            <textarea id="cryptoInput" rows="4" style="width:100%;background:var(--terminal);border:1px solid var(--border);color:var(--text);padding:8px;font-family:var(--font-main);resize:vertical;"></textarea>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="tool-btn" onclick="cryptoAction('rot13')" style="padding:6px 12px;">ROT13</button>
+            <button class="tool-btn" onclick="cryptoAction('b64enc')" style="padding:6px 12px;">BASE64 →</button>
+            <button class="tool-btn" onclick="cryptoAction('b64dec')" style="padding:6px 12px;">← BASE64</button>
+            <button class="tool-btn" onclick="cryptoAction('reverse')" style="padding:6px 12px;">REVERSE</button>
+            <button class="tool-btn" onclick="cryptoAction('hash')" style="padding:6px 12px;">HASH</button>
+            <button class="tool-btn" onclick="cryptoAction('binary')" style="padding:6px 12px;">BINAIRE</button>
+          </div>
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:4px;">SORTIE:</label>
+            <textarea id="cryptoOutput" rows="4" readonly style="width:100%;background:var(--terminal);border:1px solid var(--border);color:var(--green);padding:8px;font-family:var(--font-main);resize:vertical;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- PANEL DROIT: STATUS -->
+  <section class="panel panel-right">
+    <div class="panel-header">
+      <span class="panel-title">◢ Statut opérationnel</span>
+    </div>
+    <div class="panel-content">
+      <div class="agents-list">
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:6px;letter-spacing:0.1em;">AGENTS EN LIGNE</div>
+        <div id="agentsList"></div>
+      </div>
+      
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:6px;letter-spacing:0.1em;">OUTILS RAPIDES</div>
+      <div class="quick-tools">
+        <button class="tool-btn" onclick="quickTool('keygen')"><span class="icon">🔑</span>KEYGEN</button>
+        <button class="tool-btn" onclick="quickTool('timestamp')"><span class="icon">⏱</span>TIMESTAMP</button>
+        <button class="tool-btn" onclick="quickTool('uuid')"><span class="icon">🆔</span>UUID</button>
+        <button class="tool-btn" onclick="quickTool('dice')"><span class="icon">🎲</span>D20</button>
+      </div>
+      
+      <div class="intel-feed">
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:6px;letter-spacing:0.1em;">FLUX INTEL</div>
+        <div id="intelFeed"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-left">
+    <span>SESSION: <span id="sessionId">--</span></span>
+    <span>CLEARANCE: <span id="clearanceLevel" style="color:var(--amber)">LEVEL 3</span></span>
+    <span>UPTIME: <span id="uptimeDisplay">00:00:00</span></span>
+  </div>
+  <div class="footer-sig">"Dans l'ombre, nous veillons." — §9</div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+const DOSSIERS = [
+  { code: "OP-7734", name: "NIGHTFALL", status: "active", classified: true, brief: "Surveillance du réseau HYDRA. Contact établi avec l'asset CARDINAL." },
+  { code: "OP-2891", name: "ECHO CHAMBER", status: "active", classified: false, brief: "Analyse des communications interceptées. Pattern détecté secteur 7." },
+  { code: "OP-5523", name: "WINTER GARDEN", status: "pending", classified: true, brief: "Infiltration programmée. Attente confirmation niveau 5." },
+  { code: "OP-1147", name: "GLASS BRIDGE", status: "active", classified: false, brief: "Liaison inter-agences. Protocole RAINBOW actif." },
+  { code: "OP-8891", name: "DEEP BLUE", status: "closed", classified: true, brief: "[ARCHIVÉ] Opération conclue. Rapport final disponible." },
+  { code: "OP-3342", name: "PAPER TRAIL", status: "pending", classified: false, brief: "Investigation financière en cours. 47 comptes identifiés." },
+  { code: "OP-6677", name: "SILENT HILL", status: "active", classified: true, brief: "Zone chaude. Extraction prévue T+48h." },
+];
+
+const AGENTS = [
+  { code: "ARC-7", name: "ARCHON", status: "online" },
+  { code: "VLK-3", name: "VALKYRIE", status: "online" },
+  { code: "SHD-9", name: "SHADOW", status: "busy" },
+  { code: "PHX-1", name: "PHOENIX", status: "online" },
+  { code: "GHT-5", name: "GHOST", status: "offline" },
+  { code: "SPT-2", name: "SPECTER", status: "online" },
+];
+
+const INTEL = [
+  { time: "14:32", text: "Signal intercepté secteur DELTA-7", type: "normal" },
+  { time: "14:28", text: "CARDINAL: RDV confirmé 22h00 local", type: "alert" },
+  { time: "14:15", text: "Analyse pattern terminée - 3 anomalies", type: "normal" },
+  { time: "14:02", text: "ALERTE: Mouvement détecté zone ECHO", type: "critical" },
+  { time: "13:55", text: "Mise à jour protocole RAINBOW v2.3", type: "normal" },
+];
+
+const EASTER_EGGS = {
+  "joshua": "GREETINGS, PROFESSOR FALKEN.\nSHALL WE PLAY A GAME?\n\n[RÉFÉRENCE: WARGAMES, 1983]",
+  "hack the planet": "MESS WITH THE BEST, DIE LIKE THE REST.\n\n[RÉFÉRENCE: HACKERS, 1995]",
+  "follow the white rabbit": "Wake up, Neo...\nThe Matrix has you.\n\n[RÉFÉRENCE: THE MATRIX, 1999]",
+  "mrrobot": "Hello, friend. Hello, friend?\nThat's lame.\n\n[RÉFÉRENCE: MR. ROBOT, 2015]",
+  "42": "La réponse à la grande question sur la vie, l'univers et le reste.\n\n[RÉFÉRENCE: H2G2, DOUGLAS ADAMS]",
+  "there is no spoon": "Then you'll see that it is not the spoon that bends, it is only yourself.\n\n[RÉFÉRENCE: THE MATRIX, 1999]",
+  "i know kung fu": "Show me.\n\n[RÉFÉRENCE: THE MATRIX, 1999]",
+  "wintermute": "The matrix has its roots in primitive arcade games.\nNeuromancer.\n\n[RÉFÉRENCE: WILLIAM GIBSON, 1984]",
+  "ghost in the shell": "Et si un cyber-cerveau pouvait générer son propre ghost,\ncréer sa propre âme?\n\n[RÉFÉRENCE: GHOST IN THE SHELL, 1995]",
+  "sudo": "ACCÈS REFUSÉ. Nice try, hacker.\n\n[RÉFÉRENCE: XKCD #149]",
+  "rm -rf": "ERREUR CRITIQUE: Tentative de destruction système détectée.\nIncident reporté.\n\n[NICE TRY]",
+  "konami": "↑↑↓↓←→←→BA\n+30 VIES ACCORDÉES\n\n[RÉFÉRENCE: KONAMI CODE, 1986]",
+  "xyzzy": "Nothing happens.\n\n[RÉFÉRENCE: COLOSSAL CAVE ADVENTURE, 1976]",
+  "plugh": "A hollow voice says 'PLUGH'.\n\n[RÉFÉRENCE: COLOSSAL CAVE ADVENTURE, 1976]",
+  "do a barrel roll": "*L'écran fait une rotation*\n\n[RÉFÉRENCE: STAR FOX 64, 1997]",
+  "hello world": "printf(\"Hello, World!\\n\");\n\n[RÉFÉRENCE: K&R C, 1978]",
+  "all your base": "ALL YOUR BASE ARE BELONG TO US.\nYOU HAVE NO CHANCE TO SURVIVE MAKE YOUR TIME.\n\n[RÉFÉRENCE: ZERO WING, 1989]",
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let currentDossier = null;
+let commandHistory = [];
+let historyIndex = -1;
+let sessionStart = Date.now();
+let notes = JSON.parse(localStorage.getItem('s9_notes') || '[]');
+let logs = JSON.parse(localStorage.getItem('s9_logs') || '[]');
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+init();
+
+function init() {
+  // Generate session ID
+  document.getElementById('sessionId').textContent = 
+    'S9-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+  
+  // Start clock
+  updateClock();
+  setInterval(updateClock, 1000);
+  
+  // Update uptime
+  setInterval(updateUptime, 1000);
+  
+  // Render panels
+  renderDossiers();
+  renderAgents();
+  renderIntel();
+  
+  // Setup tabs
+  setupTabs();
+  
+  // Setup console
+  setupConsole();
+  
+  // Setup comms
+  setupComms();
+  
+  // Boot sequence
+  bootSequence();
+}
+
+function updateClock() {
+  const now = new Date();
+  const utc = now.toISOString().substring(11, 19);
+  document.getElementById('clock').textContent = utc + ' UTC';
+}
+
+function updateUptime() {
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+  const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+  const s = (elapsed % 60).toString().padStart(2, '0');
+  document.getElementById('uptimeDisplay').textContent = `${h}:${m}:${s}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function setupTabs() {
+  document.querySelectorAll('.console-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.console-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      document.querySelectorAll('.console-body').forEach(b => b.classList.add('hidden'));
+      document.getElementById('tab' + capitalize(tab.dataset.tab)).classList.remove('hidden');
+    };
+  });
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ═══════════════════════════════════════════════════════════════
+// DOSSIERS
+// ═══════════════════════════════════════════════════════════════
+function renderDossiers() {
+  const container = document.getElementById('dossierList');
+  container.innerHTML = '';
+  
+  DOSSIERS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'dossier-item' + (d.classified ? ' classified' : '') + (currentDossier?.code === d.code ? ' active' : '');
+    el.innerHTML = `
+      <div class="dossier-code">${d.code}</div>
+      <div class="dossier-name">${d.name}</div>
+      <span class="dossier-status ${d.status}">${d.status.toUpperCase()}</span>
+    `;
+    el.onclick = () => selectDossier(d);
+    container.appendChild(el);
+  });
+  
+  document.getElementById('dossierCount').textContent = DOSSIERS.length;
+}
+
+function selectDossier(d) {
+  currentDossier = d;
+  renderDossiers();
+  printLine(`Dossier ${d.code} [${d.name}] ouvert.`, 'success');
+  printLine(d.brief, 'system');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGENTS
+// ═══════════════════════════════════════════════════════════════
+function renderAgents() {
+  const container = document.getElementById('agentsList');
+  container.innerHTML = '';
+  
+  AGENTS.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'agent-item';
+    el.innerHTML = `
+      <span class="agent-status ${a.status === 'offline' ? 'offline' : a.status === 'busy' ? 'busy' : ''}"></span>
+      <span class="agent-name">${a.name}</span>
+      <span class="agent-code">${a.code}</span>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTEL FEED
+// ═══════════════════════════════════════════════════════════════
+function renderIntel() {
+  const container = document.getElementById('intelFeed');
+  container.innerHTML = '';
+  
+  INTEL.forEach(i => {
+    const el = document.createElement('div');
+    el.className = 'intel-item' + (i.type === 'alert' ? ' alert' : i.type === 'critical' ? ' critical' : '');
+    el.innerHTML = `
+      <div class="intel-time">${i.time}</div>
+      <div class="intel-text">${i.text}</div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONSOLE
+// ═══════════════════════════════════════════════════════════════
+function setupConsole() {
+  const input = document.getElementById('consoleInput');
+  
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const cmd = input.value.trim();
+      if (cmd) {
+        commandHistory.push(cmd);
+        historyIndex = commandHistory.length;
+        processCommand(cmd);
+      }
+      input.value = '';
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        historyIndex--;
+        input.value = commandHistory[historyIndex];
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex < commandHistory.length - 1) {
+        historyIndex++;
+        input.value = commandHistory[historyIndex];
+      } else {
+        historyIndex = commandHistory.length;
+        input.value = '';
+      }
+    }
+  });
+}
+
+function printLine(text, type = '') {
+  const output = document.getElementById('consoleOutput');
+  const line = document.createElement('div');
+  line.className = 'console-line ' + type;
+  line.textContent = text;
+  output.appendChild(line);
+  output.scrollTop = output.scrollHeight;
+}
+
+function printAscii(text) {
+  const output = document.getElementById('consoleOutput');
+  const line = document.createElement('div');
+  line.className = 'console-line ascii';
+  line.textContent = text;
+  output.appendChild(line);
+  output.scrollTop = output.scrollHeight;
+}
+
+function bootSequence() {
+  const boot = [
+    "SECTION 9 TERMINAL v3.7.2",
+    "═══════════════════════════════════════",
+    "Initialisation du système...",
+    "Connexion réseau sécurisé... OK",
+    "Chargement protocoles crypto... OK",
+    "Vérification habilitation... LEVEL 3",
+    "═══════════════════════════════════════",
+    "",
+    "Bienvenue, Opérateur.",
+    "Tapez 'help' pour la liste des commandes.",
+    ""
+  ];
+  
+  boot.forEach((line, i) => {
+    setTimeout(() => printLine(line, i < 6 ? 'system' : ''), i * 100);
+  });
+}
+
+function processCommand(cmd) {
+  printLine(cmd, 'input');
+  
+  const lower = cmd.toLowerCase().trim();
+  const args = cmd.split(' ');
+  const command = args[0].toLowerCase();
+  const rest = args.slice(1).join(' ');
+  
+  // Easter eggs first
+  if (EASTER_EGGS[lower]) {
+    printLine(EASTER_EGGS[lower], 'warning');
+    if (lower === 'do a barrel roll') {
+      document.body.style.transition = 'transform 1s';
+      document.body.style.transform = 'rotate(360deg)';
+      setTimeout(() => { document.body.style.transform = ''; }, 1000);
+    }
+    return;
+  }
+  
+  // Commands
+  switch (command) {
+    case 'help':
+      printLine("═══ COMMANDES DISPONIBLES ═══", 'system');
+      printLine("help          - Cette aide", '');
+      printLine("clear/cls     - Efface la console", '');
+      printLine("status        - État système", '');
+      printLine("whoami        - Votre identité", '');
+      printLine("list          - Liste des dossiers", '');
+      printLine("open [code]   - Ouvrir un dossier", '');
+      printLine("agents        - Agents en ligne", '');
+      printLine("encrypt [txt] - Chiffrer (ROT13)", '');
+      printLine("decrypt [txt] - Déchiffrer", '');
+      printLine("keygen        - Générer une clé", '');
+      printLine("scan [cible]  - Scanner une cible", '');
+      printLine("dice [XdY]    - Lancer des dés", '');
+      printLine("note [txt]    - Créer une note", '');
+      printLine("notes         - Voir les notes", '');
+      printLine("═══════════════════════════════", 'system');
+      printLine("Consultez l'onglet MANUEL pour plus de détails.", '');
+      break;
+      
+    case 'clear':
+    case 'cls':
+      document.getElementById('consoleOutput').innerHTML = '';
+      break;
+      
+    case 'status':
+      printLine("═══ ÉTAT SYSTÈME ═══", 'system');
+      printLine("Réseau:     OPÉRATIONNEL", 'success');
+      printLine("Crypto:     ACTIF (AES-256)", 'success');
+      printLine("Agents:     " + AGENTS.filter(a => a.status !== 'offline').length + "/" + AGENTS.length + " en ligne", '');
+      printLine("Dossiers:   " + DOSSIERS.filter(d => d.status === 'active').length + " actifs", '');
+      printLine("Mémoire:    " + Math.floor(Math.random() * 20 + 60) + "% utilisée", '');
+      printLine("Clearance:  LEVEL 3", 'warning');
+      break;
+      
+    case 'whoami':
+      printLine("Opérateur: [REDACTED]", '');
+      printLine("ID Session: " + document.getElementById('sessionId').textContent, '');
+      printLine("Clearance: LEVEL 3", '');
+      printLine("Affectation: SECTION 9 - DIVISION CYBER", '');
+      break;
+      
+    case 'uptime':
+      printLine("Session active depuis: " + document.getElementById('uptimeDisplay').textContent, '');
+      break;
+      
+    case 'date':
+      printLine(new Date().toISOString(), 'system');
+      break;
+      
+    case 'list':
+      printLine("═══ DOSSIERS ═══", 'system');
+      DOSSIERS.forEach(d => {
+        const status = d.status === 'active' ? '●' : d.status === 'pending' ? '○' : '×';
+        printLine(`[${status}] ${d.code} - ${d.name}`, d.classified ? 'warning' : '');
+      });
+      break;
+      
+    case 'open':
+      if (!rest) {
+        printLine("Usage: open [code]", 'error');
+      } else {
+        const dossier = DOSSIERS.find(d => d.code.toLowerCase() === rest.toLowerCase());
+        if (dossier) {
+          selectDossier(dossier);
+        } else {
+          printLine("Dossier non trouvé: " + rest, 'error');
+        }
+      }
+      break;
+      
+    case 'close':
+      if (currentDossier) {
+        printLine("Dossier " + currentDossier.code + " fermé.", '');
+        currentDossier = null;
+        renderDossiers();
+      } else {
+        printLine("Aucun dossier ouvert.", 'error');
+      }
+      break;
+      
+    case 'mission':
+      if (currentDossier) {
+        printLine("═══ MISSION: " + currentDossier.name + " ═══", 'system');
+        printLine("Code: " + currentDossier.code, '');
+        printLine("Statut: " + currentDossier.status.toUpperCase(), currentDossier.status === 'active' ? 'success' : 'warning');
+        printLine("Brief: " + currentDossier.brief, '');
+      } else {
+        printLine("Aucune mission sélectionnée. Utilisez 'open [code]'.", 'error');
+      }
+      break;
+      
+    case 'brief':
+      if (!rest) {
+        printLine("Usage: brief [code]", 'error');
+      } else {
+        const d = DOSSIERS.find(d => d.code.toLowerCase() === rest.toLowerCase());
+        if (d) {
+          printLine("═══ BRIEFING: " + d.name + " ═══", 'system');
+          printLine(d.brief, '');
+        } else {
+          printLine("Dossier non trouvé.", 'error');
+        }
+      }
+      break;
+      
+    case 'agents':
+      printLine("═══ AGENTS ═══", 'system');
+      AGENTS.forEach(a => {
+        const icon = a.status === 'online' ? '●' : a.status === 'busy' ? '◐' : '○';
+        printLine(`[${icon}] ${a.code} - ${a.name} (${a.status})`, a.status === 'offline' ? '' : 'success');
+      });
+      break;
+      
+    case 'ping':
+      if (!rest) {
+        printLine("Usage: ping [agent]", 'error');
+      } else {
+        const agent = AGENTS.find(a => a.code.toLowerCase() === rest.toLowerCase() || a.name.toLowerCase() === rest.toLowerCase());
+        if (agent) {
+          printLine("Ping " + agent.name + "...", 'system');
+          setTimeout(() => {
+            if (agent.status === 'offline') {
+              printLine("TIMEOUT - Agent hors ligne.", 'error');
+            } else {
+              printLine("PONG - " + agent.name + " répond. Latence: " + Math.floor(Math.random() * 100 + 20) + "ms", 'success');
+            }
+          }, 500);
+        } else {
+          printLine("Agent non trouvé.", 'error');
+        }
+      }
+      break;
+      
+    case 'encrypt':
+      if (!rest) {
+        printLine("Usage: encrypt [texte]", 'error');
+      } else {
+        const encrypted = rot13(rest);
+        printLine("Chiffré: " + encrypted, 'success');
+      }
+      break;
+      
+    case 'decrypt':
+      if (!rest) {
+        printLine("Usage: decrypt [texte]", 'error');
+      } else {
+        const decrypted = rot13(rest);
+        printLine("Déchiffré: " + decrypted, 'success');
+      }
+      break;
+      
+    case 'hash':
+      if (!rest) {
+        printLine("Usage: hash [texte]", 'error');
+      } else {
+        const hash = simpleHash(rest);
+        printLine("Hash: " + hash, 'success');
+      }
+      break;
+      
+    case 'keygen':
+      const key = generateKey();
+      printLine("Clé générée: " + key, 'success');
+      break;
+      
+    case 'b64':
+      if (!rest) {
+        printLine("Usage: b64 [texte]", 'error');
+      } else {
+        printLine("Base64: " + btoa(rest), 'success');
+      }
+      break;
+      
+    case 'unb64':
+      if (!rest) {
+        printLine("Usage: unb64 [texte]", 'error');
+      } else {
+        try {
+          printLine("Décodé: " + atob(rest), 'success');
+        } catch (e) {
+          printLine("Erreur de décodage Base64.", 'error');
+        }
+      }
+      break;
+      
+    case 'scan':
+      if (!rest) {
+        printLine("Usage: scan [cible]", 'error');
+      } else {
+        printLine("Scan de " + rest + " en cours...", 'system');
+        setTimeout(() => {
+          printLine("═══ RÉSULTATS DU SCAN ═══", 'system');
+          printLine("Cible: " + rest, '');
+          printLine("Ports ouverts: 22, 80, 443, 8080", '');
+          printLine("OS détecté: Linux (probabilité 78%)", '');
+          printLine("Services: SSH, HTTP, HTTPS", '');
+          printLine("Vulnérabilités: " + Math.floor(Math.random() * 5) + " potentielles", 'warning');
+        }, 1500);
+      }
+      break;
+      
+    case 'trace':
+      if (!rest) {
+        printLine("Usage: trace [id]", 'error');
+      } else {
+        printLine("Traçage de " + rest + "...", 'system');
+        setTimeout(() => {
+          printLine("Localisation: " + ['BRUXELLES', 'PARIS', 'BERLIN', 'AMSTERDAM', 'LONDRES'][Math.floor(Math.random() * 5)], 'success');
+          printLine("Dernière activité: " + new Date(Date.now() - Math.random() * 86400000).toISOString(), '');
+        }, 1000);
+      }
+      break;
+      
+    case 'timer':
+      const secs = parseInt(rest) || 60;
+      printLine("Timer: " + secs + " secondes", 'system');
+      let remaining = secs;
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          printLine("⏰ TIMER TERMINÉ!", 'warning');
+        } else if (remaining <= 10) {
+          printLine("T-" + remaining + "...", 'warning');
+        }
+      }, 1000);
+      break;
+      
+    case 'dice':
+      const diceMatch = rest.match(/(\d+)?d(\d+)/i);
+      if (diceMatch) {
+        const count = parseInt(diceMatch[1]) || 1;
+        const sides = parseInt(diceMatch[2]);
+        const rolls = [];
+        for (let i = 0; i < Math.min(count, 20); i++) {
+          rolls.push(Math.floor(Math.random() * sides) + 1);
+        }
+        printLine("🎲 " + count + "d" + sides + ": [" + rolls.join(", ") + "] = " + rolls.reduce((a, b) => a + b, 0), 'success');
+      } else {
+        printLine("Usage: dice [X]d[Y] (ex: 2d6)", 'error');
+      }
+      break;
+      
+    case 'note':
+      if (!rest) {
+        printLine("Usage: note [texte]", 'error');
+      } else {
+        notes.push({ time: new Date().toISOString(), text: rest });
+        localStorage.setItem('s9_notes', JSON.stringify(notes));
+        printLine("Note ajoutée (#" + notes.length + ")", 'success');
+      }
+      break;
+      
+    case 'notes':
+      if (notes.length === 0) {
+        printLine("Aucune note enregistrée.", '');
+      } else {
+        printLine("═══ NOTES ═══", 'system');
+        notes.forEach((n, i) => {
+          printLine("#" + (i + 1) + " [" + n.time.substring(11, 19) + "] " + n.text, '');
+        });
+      }
+      break;
+      
+    case 'delnote':
+      const noteIndex = parseInt(rest) - 1;
+      if (isNaN(noteIndex) || noteIndex < 0 || noteIndex >= notes.length) {
+        printLine("Note invalide.", 'error');
+      } else {
+        notes.splice(noteIndex, 1);
+        localStorage.setItem('s9_notes', JSON.stringify(notes));
+        printLine("Note supprimée.", 'success');
+      }
+      break;
+      
+    case 'log':
+      if (!rest) {
+        printLine("Usage: log [texte]", 'error');
+      } else {
+        logs.push({ time: new Date().toISOString(), dossier: currentDossier?.code || 'N/A', text: rest });
+        localStorage.setItem('s9_logs', JSON.stringify(logs));
+        printLine("Entrée ajoutée au journal.", 'success');
+      }
+      break;
+      
+    case 'clearance':
+      printLine("Niveau d'habilitation: LEVEL 3", 'warning');
+      printLine("Accès: CONFIDENTIEL, SECRET", '');
+      printLine("Restrictions: TOP SECRET, SAP, SCI", 'error');
+      break;
+      
+    case 'export':
+      const exportData = {
+        session: document.getElementById('sessionId').textContent,
+        timestamp: new Date().toISOString(),
+        notes: notes,
+        logs: logs,
+        dossierActif: currentDossier?.code
+      };
+      printLine("Export généré. Voir console navigateur (F12).", 'success');
+      console.log("=== EXPORT SECTION 9 ===");
+      console.log(JSON.stringify(exportData, null, 2));
+      break;
+      
+    case 'goto':
+      if (!rest) {
+        printLine("Usage: goto [url]", 'error');
+      } else {
+        let url = rest;
+        if (!url.startsWith('http')) url = 'https://' + url;
+        window.open(url, '_blank');
+        printLine("Ouverture de " + url, 'system');
+      }
+      break;
+      
+    case 'msg':
+    case 'broadcast':
+      printLine("Message envoyé sur canal sécurisé.", 'success');
+      break;
+      
+    case 'lookup':
+      printLine("Recherche: " + (rest || '*'), 'system');
+      setTimeout(() => {
+        printLine(Math.floor(Math.random() * 50 + 10) + " résultats trouvés.", '');
+      }, 800);
+      break;
+      
+    case 'version':
+      printLine("SECTION 9 TERMINAL v3.7.2", 'system');
+      printLine("Build: 2024.12.28-STABLE", '');
+      printLine("Protocole: OMEGA-7", '');
+      break;
+      
+    case 'reboot':
+      printLine("Redémarrage système...", 'warning');
+      setTimeout(() => location.reload(), 1500);
+      break;
+      
+    case 'exit':
+    case 'quit':
+    case 'logout':
+      printLine("Fermeture de session...", 'warning');
+      printLine("À bientôt, Opérateur.", '');
+      break;
+      
+    default:
+      printLine("Commande inconnue: " + command, 'error');
+      printLine("Tapez 'help' pour la liste des commandes.", '');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRYPTO FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function rot13(str) {
+  return str.replace(/[a-zA-Z]/g, c => {
+    return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+  });
+}
+
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+}
+
+function generateKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let key = '';
+  for (let i = 0; i < 32; i++) {
+    if (i > 0 && i % 4 === 0) key += '-';
+    key += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return key;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRYPTO TAB
+// ═══════════════════════════════════════════════════════════════
+function cryptoAction(action) {
+  const input = document.getElementById('cryptoInput').value;
+  let output = '';
+  
+  switch (action) {
+    case 'rot13':
+      output = rot13(input);
+      break;
+    case 'b64enc':
+      output = btoa(input);
+      break;
+    case 'b64dec':
+      try { output = atob(input); } catch (e) { output = 'ERREUR: Base64 invalide'; }
+      break;
+    case 'reverse':
+      output = input.split('').reverse().join('');
+      break;
+    case 'hash':
+      output = simpleHash(input);
+      break;
+    case 'binary':
+      output = input.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+      break;
+  }
+  
+  document.getElementById('cryptoOutput').value = output;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMMS TAB
+// ═══════════════════════════════════════════════════════════════
+function setupComms() {
+  const input = document.getElementById('commsInput');
+  const log = document.getElementById('commsLog');
+  
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && input.value.trim()) {
+      const msg = document.createElement('div');
+      msg.innerHTML = `<span style="color:var(--muted)">[${new Date().toISOString().substring(11, 19)}]</span> <span style="color:var(--amber)">VOUS:</span> ${input.value}`;
+      log.appendChild(msg);
+      log.scrollTop = log.scrollHeight;
+      input.value = '';
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUICK TOOLS
+// ═══════════════════════════════════════════════════════════════
+function quickTool(tool) {
+  switch (tool) {
+    case 'keygen':
+      printLine("Clé: " + generateKey(), 'success');
+      break;
+    case 'timestamp':
+      printLine("Timestamp: " + Date.now(), 'success');
+      printLine("ISO: " + new Date().toISOString(), '');
+      break;
+    case 'uuid':
+      printLine("UUID: " + crypto.randomUUID(), 'success');
+      break;
+    case 'dice':
+      const roll = Math.floor(Math.random() * 20) + 1;
+      printLine("🎲 D20: " + roll + (roll === 20 ? " CRITIQUE!" : roll === 1 ? " ÉCHEC CRITIQUE!" : ""), roll === 20 ? 'success' : roll === 1 ? 'error' : '');
+      break;
+  }
+  
+  // Switch to console tab
+  document.querySelector('.console-tab[data-tab="console"]').click();
+}
+
+// Focus console on load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => document.getElementById('consoleInput').focus(), 1000);
+});
+</script>
+
+</body>
+</html>
