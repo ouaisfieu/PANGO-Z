@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS — Investigation Board</title>
+<style>
+:root {
+  --bg: #0f1115;
+  --surface: #1a1d23;
+  --card: #22262e;
+  --border: #2d323c;
+  --text: #e4e4e7;
+  --muted: #71717a;
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --pink: #ec4899;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+/* ═══════════════ HEADER ═══════════════ */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: var(--border);
+  border-color: var(--muted);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 10px;
+  gap: 8px;
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 8px 0;
+  width: 200px;
+  font-size: 13px;
+  outline: none;
+}
+
+.search-box input::placeholder { color: var(--muted); }
+
+/* ═══════════════ MAIN LAYOUT ═══════════════ */
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  main { grid-template-columns: 240px 1fr; }
+  .panel-right { display: none; }
+}
+
+/* ═══════════════ PANELS ═══════════════ */
+.panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.panel:last-child { border-right: none; }
+
+.panel-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.panel-title {
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-count {
+  background: var(--border);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* ═══════════════ ENTITY LIST ═══════════════ */
+.entity-tabs {
+  display: flex;
+  padding: 8px;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.entity-tab {
+  flex: 1;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.entity-tab:hover { background: var(--card); color: var(--text); }
+.entity-tab.active { background: var(--accent); color: white; }
+
+.entity-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.entity-item:hover {
+  border-color: var(--accent);
+  transform: translateX(2px);
+}
+
+.entity-item.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.entity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 4px;
+}
+
+.entity-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.entity-type {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-person { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.type-org { background: rgba(139,92,246,0.2); color: #a78bfa; }
+.type-place { background: rgba(34,197,94,0.2); color: #4ade80; }
+.type-event { background: rgba(245,158,11,0.2); color: #fbbf24; }
+.type-object { background: rgba(236,72,153,0.2); color: #f472b6; }
+
+.entity-meta {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+}
+
+.entity-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+}
+
+/* ═══════════════ MAIN AREA ═══════════════ */
+.main-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-tabs {
+  display: flex;
+  padding: 8px 12px;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.main-tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.main-tab:hover { background: var(--card); color: var(--text); }
+.main-tab.active { background: var(--card); color: var(--text); font-weight: 500; }
+
+.main-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════ DETAIL VIEW ═══════════════ */
+.detail-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.detail-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detail-subtitle {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.field {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.field-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.field-value {
+  font-size: 14px;
+}
+
+.field-value:empty::before {
+  content: "—";
+  color: var(--muted);
+}
+
+/* Notes */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.note-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.note-content {
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.note-encrypted {
+  color: var(--amber);
+  font-style: italic;
+}
+
+/* Relations */
+.relation-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.relation-item:hover {
+  border-color: var(--accent);
+}
+
+.relation-type {
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 80px;
+}
+
+.relation-target {
+  flex: 1;
+  font-weight: 500;
+}
+
+.relation-target-type {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ═══════════════ TIMELINE VIEW ═══════════════ */
+.timeline-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-item:last-child::before { display: none; }
+
+.timeline-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.timeline-content {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.timeline-date {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.timeline-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.timeline-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.timeline-entities {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════ GRAPH VIEW ═══════════════ */
+.graph-view {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#graphCanvas {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+.graph-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  gap: 6px;
+}
+
+/* ═══════════════ RIGHT PANEL ═══════════════ */
+.activity-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.activity-time {
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.activity-text {
+  line-height: 1.4;
+}
+
+.quick-add {
+  margin-top: 12px;
+}
+
+.quick-add textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  margin-bottom: 8px;
+}
+
+.quick-add textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ═══════════════ MODALS ═══════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.modal-close:hover { color: var(--text); }
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* ═══════════════ EMPTY STATE ═══════════════ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+
+.empty-state h3 {
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+/* ═══════════════ SCROLLBAR ═══════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">N</div>
+    <div>
+      <div class="logo-text">NEXUS</div>
+      <div class="logo-sub">Investigation Board</div>
+    </div>
+  </div>
+  
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" id="globalSearch" placeholder="Rechercher partout... (Ctrl+K)">
+  </div>
+  
+  <div class="header-actions">
+    <button class="btn" onclick="exportData()">📤 Export</button>
+    <button class="btn" onclick="importData()">📥 Import</button>
+    <button class="btn btn-primary" onclick="openModal('entity')">+ Nouvelle entité</button>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: ENTITIES LIST -->
+  <div class="panel">
+    <div class="entity-tabs">
+      <button class="entity-tab active" data-type="all">Tout</button>
+      <button class="entity-tab" data-type="person">👤</button>
+      <button class="entity-tab" data-type="org">🏢</button>
+      <button class="entity-tab" data-type="place">📍</button>
+      <button class="entity-tab" data-type="event">📅</button>
+      <button class="entity-tab" data-type="object">📦</button>
+    </div>
+    <div class="panel-header">
+      <span class="panel-title">Entités <span class="panel-count" id="entityCount">0</span></span>
+      <button class="btn" style="padding:4px 8px;font-size:11px" onclick="openModal('entity')">+</button>
+    </div>
+    <div class="panel-content" id="entityList"></div>
+  </div>
+  
+  <!-- CENTER: MAIN VIEW -->
+  <div class="main-area">
+    <div class="main-tabs">
+      <button class="main-tab active" data-view="detail">📋 Détail</button>
+      <button class="main-tab" data-view="timeline">⏱ Timeline</button>
+      <button class="main-tab" data-view="graph">🕸 Graphe</button>
+    </div>
+    <div class="main-content">
+      <div class="detail-view" id="detailView">
+        <div class="empty-state">
+          <h3>Sélectionnez une entité</h3>
+          <p>Ou créez-en une nouvelle pour commencer votre investigation.</p>
+        </div>
+      </div>
+      <div class="timeline-view" id="timelineView" style="display:none"></div>
+      <div class="graph-view" id="graphView" style="display:none">
+        <canvas id="graphCanvas"></canvas>
+        <div class="graph-controls">
+          <button class="btn" onclick="resetGraph()">⟲ Reset</button>
+          <button class="btn" onclick="zoomGraph(1.2)">+</button>
+          <button class="btn" onclick="zoomGraph(0.8)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- RIGHT: ACTIVITY & TOOLS -->
+  <div class="panel panel-right">
+    <div class="panel-header">
+      <span class="panel-title">Tableau de bord</span>
+    </div>
+    <div class="panel-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statEntities">0</div>
+          <div class="stat-label">Entités</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statRelations">0</div>
+          <div class="stat-label">Liens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statNotes">0</div>
+          <div class="stat-label">Notes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statEvents">0</div>
+          <div class="stat-label">Events</div>
+        </div>
+      </div>
+      
+      <div class="section-title">Activité récente</div>
+      <div id="activityFeed"></div>
+      
+      <div class="section-title" style="margin-top:16px">Note rapide</div>
+      <div class="quick-add">
+        <textarea id="quickNote" placeholder="Ajouter une note..."></textarea>
+        <div style="display:flex;gap:6px">
+          <button class="btn" style="flex:1" onclick="addQuickNote(false)">📝 Sauver</button>
+          <button class="btn" style="flex:1" onclick="addQuickNote(true)">🔒 Chiffrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ENTITY MODAL -->
+<div class="modal-overlay" id="modalEntity">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalEntityTitle">Nouvelle entité</span>
+      <button class="modal-close" onclick="closeModal('modalEntity')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="entityId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom / Titre</label>
+          <input type="text" id="entityName" placeholder="Nom de l'entité">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="entityType">
+            <option value="person">👤 Personne</option>
+            <option value="org">🏢 Organisation</option>
+            <option value="place">📍 Lieu</option>
+            <option value="event">📅 Événement</option>
+            <option value="object">📦 Objet</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Alias / Autres noms</label>
+        <input type="text" id="entityAlias" placeholder="Séparés par des virgules">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="entityDesc" placeholder="Description détaillée..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date (si applicable)</label>
+          <input type="date" id="entityDate">
+        </div>
+        <div class="form-group">
+          <label>Tags</label>
+          <input type="text" id="entityTags" placeholder="tag1, tag2, ...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Champs personnalisés (JSON)</label>
+        <textarea id="entityCustom" placeholder='{"clé": "valeur"}' style="min-height:60px;font-family:monospace;font-size:12px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalEntity')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEntity()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELATION MODAL -->
+<div class="modal-overlay" id="modalRelation">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Ajouter une relation</span>
+      <button class="modal-close" onclick="closeModal('modalRelation')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>De</label>
+        <select id="relationFrom"></select>
+      </div>
+      <div class="form-group">
+        <label>Type de relation</label>
+        <input type="text" id="relationType" placeholder="ex: travaille pour, connaît, possède...">
+      </div>
+      <div class="form-group">
+        <label>Vers</label>
+        <select id="relationTo"></select>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="relationNotes" placeholder="Détails sur cette relation..."></textarea>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="relationBidirectional">
+        <label for="relationBidirectional">Relation bidirectionnelle</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalRelation')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRelation()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="modalNote">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Ajouter une note</span>
+      <button class="modal-close" onclick="closeModal('modalNote')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="noteEntityId">
+      <div class="form-group">
+        <label>Contenu</label>
+        <textarea id="noteContent" placeholder="Votre note..." style="min-height:150px"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Source</label>
+        <input type="text" id="noteSource" placeholder="D'où vient cette information?">
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="noteEncrypt">
+        <label for="noteEncrypt">🔒 Chiffrer cette note (mot de passe requis)</label>
+      </div>
+      <div class="form-group" id="notePasswordGroup" style="display:none">
+        <label>Mot de passe</label>
+        <input type="password" id="notePassword" placeholder="Mot de passe de chiffrement">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalNote')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveNote()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="modal-overlay" id="modalEvent">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Ajouter un événement</span>
+      <button class="modal-close" onclick="closeModal('modalEvent')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="eventDate">
+        </div>
+        <div class="form-group">
+          <label>Heure (optionnel)</label>
+          <input type="time" id="eventTime">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Titre</label>
+        <input type="text" id="eventTitle" placeholder="Que s'est-il passé?">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="eventDesc" placeholder="Détails..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Entités impliquées</label>
+        <select id="eventEntities" multiple style="min-height:80px"></select>
+        <small style="color:var(--muted);font-size:11px">Ctrl+clic pour sélection multiple</small>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalEvent')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- DECRYPT MODAL -->
+<div class="modal-overlay" id="modalDecrypt">
+  <div class="modal" style="max-width:350px">
+    <div class="modal-header">
+      <span class="modal-title">🔒 Note chiffrée</span>
+      <button class="modal-close" onclick="closeModal('modalDecrypt')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="decryptPassword" placeholder="Entrez le mot de passe">
+      </div>
+      <input type="hidden" id="decryptNoteId">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="decryptNote()">Déchiffrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT/EXPORT -->
+<input type="file" id="importFile" accept=".json" style="display:none">
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATABASE
+// ═══════════════════════════════════════════════════════════════
+const DB_KEY = 'nexus_investigation_db';
+
+let db = {
+  entities: [],
+  relations: [],
+  notes: [],
+  events: [],
+  activity: []
+};
+
+let currentEntity = null;
+let currentTypeFilter = 'all';
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+init();
+
+function init() {
+  loadDB();
+  setupTabs();
+  setupSearch();
+  setupEncryptToggle();
+  render();
+}
+
+function loadDB() {
+  const saved = localStorage.getItem(DB_KEY);
+  if (saved) {
+    try {
+      db = JSON.parse(saved);
+    } catch (e) {
+      console.error('DB load error:', e);
+    }
+  }
+}
+
+function saveDB() {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function render() {
+  renderEntityList();
+  renderStats();
+  renderActivity();
+  renderTimeline();
+  if (currentEntity) {
+    renderDetail(currentEntity);
+  }
+}
+
+function renderEntityList() {
+  const container = document.getElementById('entityList');
+  const search = document.getElementById('globalSearch').value.toLowerCase();
+  
+  let filtered = db.entities;
+  if (currentTypeFilter !== 'all') {
+    filtered = filtered.filter(e => e.type === currentTypeFilter);
+  }
+  if (search) {
+    filtered = filtered.filter(e => 
+      e.name.toLowerCase().includes(search) ||
+      (e.alias || '').toLowerCase().includes(search) ||
+      (e.tags || []).some(t => t.toLowerCase().includes(search))
+    );
+  }
+  
+  container.innerHTML = filtered.length ? '' : '<div class="empty-state"><p>Aucune entité</p></div>';
+  
+  filtered.forEach(e => {
+    const el = document.createElement('div');
+    el.className = 'entity-item' + (currentEntity?.id === e.id ? ' active' : '');
+    
+    const relCount = db.relations.filter(r => r.from === e.id || r.to === e.id).length;
+    const noteCount = db.notes.filter(n => n.entityId === e.id).length;
+    
+    el.innerHTML = `
+      <div class="entity-header">
+        <span class="entity-name">${e.name}</span>
+        <span class="entity-type type-${e.type}">${getTypeLabel(e.type)}</span>
+      </div>
+      <div class="entity-meta">
+        <span>${relCount} liens</span>
+        <span>${noteCount} notes</span>
+      </div>
+      ${(e.tags && e.tags.length) ? `<div class="entity-tags">${e.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+    `;
+    
+    el.onclick = () => selectEntity(e);
+    container.appendChild(el);
+  });
+  
+  document.getElementById('entityCount').textContent = filtered.length;
+}
+
+function renderStats() {
+  document.getElementById('statEntities').textContent = db.entities.length;
+  document.getElementById('statRelations').textContent = db.relations.length;
+  document.getElementById('statNotes').textContent = db.notes.length;
+  document.getElementById('statEvents').textContent = db.events.length;
+}
+
+function renderActivity() {
+  const container = document.getElementById('activityFeed');
+  const recent = db.activity.slice(-10).reverse();
+  
+  container.innerHTML = recent.length ? '' : '<div style="color:var(--muted);font-size:12px">Aucune activité</div>';
+  
+  recent.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'activity-item';
+    el.innerHTML = `
+      <div class="activity-time">${formatDate(a.time)}</div>
+      <div class="activity-text">${a.text}</div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function renderDetail(entity) {
+  const container = document.getElementById('detailView');
+  
+  const relations = db.relations.filter(r => r.from === entity.id || r.to === entity.id);
+  const notes = db.notes.filter(n => n.entityId === entity.id);
+  
+  let customFields = '';
+  if (entity.custom) {
+    try {
+      const custom = typeof entity.custom === 'string' ? JSON.parse(entity.custom) : entity.custom;
+      customFields = Object.entries(custom).map(([k, v]) => `
+        <div class="field">
+          <div class="field-label">${k}</div>
+          <div class="field-value">${v}</div>
+        </div>
+      `).join('');
+    } catch (e) {}
+  }
+  
+  container.innerHTML = `
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">${entity.name}</div>
+        <div class="detail-subtitle">
+          <span class="entity-type type-${entity.type}">${getTypeLabel(entity.type)}</span>
+          ${entity.alias ? ` • AKA: ${entity.alias}` : ''}
+          ${entity.date ? ` • ${entity.date}` : ''}
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn" onclick="editEntity('${entity.id}')">✏️ Modifier</button>
+        <button class="btn" onclick="deleteEntity('${entity.id}')" style="color:var(--red)">🗑️</button>
+      </div>
+    </div>
+    
+    ${entity.desc ? `
+    <div class="section">
+      <div class="section-title">Description</div>
+      <div style="line-height:1.6;color:var(--text)">${entity.desc.replace(/\n/g, '<br>')}</div>
+    </div>
+    ` : ''}
+    
+    ${customFields ? `
+    <div class="section">
+      <div class="section-title">Informations</div>
+      <div class="field-grid">${customFields}</div>
+    </div>
+    ` : ''}
+    
+    <div class="section">
+      <div class="section-title">
+        Relations (${relations.length})
+        <button class="btn" style="padding:2px 8px;font-size:11px" onclick="openRelationModal('${entity.id}')">+ Ajouter</button>
+      </div>
+      <div id="relationsList">
+        ${relations.length ? relations.map(r => {
+          const isFrom = r.from === entity.id;
+          const otherId = isFrom ? r.to : r.from;
+          const other = db.entities.find(e => e.id === otherId);
+          if (!other) return '';
+          return `
+            <div class="relation-item" onclick="selectEntity(db.entities.find(e=>e.id==='${other.id}'))">
+              <span class="relation-type">${isFrom ? r.type : '← ' + r.type}</span>
+              <span class="relation-target">${other.name}</span>
+              <span class="relation-target-type">${getTypeLabel(other.type)}</span>
+              <button onclick="event.stopPropagation();deleteRelation('${r.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer">×</button>
+            </div>
+          `;
+        }).join('') : '<div style="color:var(--muted);font-size:12px">Aucune relation</div>'}
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">
+        Notes (${notes.length})
+        <button class="btn" style="padding:2px 8px;font-size:11px" onclick="openNoteModal('${entity.id}')">+ Ajouter</button>
+      </div>
+      <div class="notes-list">
+        ${notes.length ? notes.map(n => `
+          <div class="note-item">
+            <div class="note-header">
+              <span>${formatDate(n.time)}</span>
+              <div>
+                ${n.source ? `<span style="margin-right:8px">📎 ${n.source}</span>` : ''}
+                <button onclick="deleteNote('${n.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer">×</button>
+              </div>
+            </div>
+            <div class="note-content ${n.encrypted ? 'note-encrypted' : ''}">
+              ${n.encrypted ? `<span onclick="promptDecrypt('${n.id}')" style="cursor:pointer">🔒 Cliquez pour déchiffrer</span>` : n.content.replace(/\n/g, '<br>')}
+            </div>
+          </div>
+        `).join('') : '<div style="color:var(--muted);font-size:12px">Aucune note</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timelineView');
+  const events = [...db.events].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  container.innerHTML = events.length ? '' : '<div class="empty-state"><h3>Timeline vide</h3><p>Ajoutez des événements pour construire la chronologie.</p><button class="btn btn-primary" onclick="openModal(\'event\')" style="margin-top:12px">+ Ajouter un événement</button></div>';
+  
+  events.forEach(e => {
+    const entities = (e.entities || []).map(id => db.entities.find(ent => ent.id === id)).filter(Boolean);
+    
+    const el = document.createElement('div');
+    el.className = 'timeline-item';
+    el.innerHTML = `
+      <div class="timeline-dot">📅</div>
+      <div class="timeline-content">
+        <div class="timeline-date">${e.date}${e.time ? ' ' + e.time : ''}</div>
+        <div class="timeline-title">${e.title}</div>
+        ${e.desc ? `<div class="timeline-desc">${e.desc}</div>` : ''}
+        ${entities.length ? `
+          <div class="timeline-entities">
+            ${entities.map(ent => `<span class="tag" onclick="selectEntity(db.entities.find(e=>e.id==='${ent.id}'))" style="cursor:pointer">${ent.name}</span>`).join('')}
+          </div>
+        ` : ''}
+        <button onclick="deleteEvent('${e.id}')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">×</button>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ENTITY OPERATIONS
+// ═══════════════════════════════════════════════════════════════
+function selectEntity(entity) {
+  currentEntity = entity;
+  renderEntityList();
+  renderDetail(entity);
+  
+  // Switch to detail tab
+  document.querySelector('.main-tab[data-view="detail"]').click();
+}
+
+function saveEntity() {
+  const id = document.getElementById('entityId').value;
+  const entity = {
+    id: id || genId(),
+    name: document.getElementById('entityName').value.trim(),
+    type: document.getElementById('entityType').value,
+    alias: document.getElementById('entityAlias').value.trim(),
+    desc: document.getElementById('entityDesc').value.trim(),
+    date: document.getElementById('entityDate').value,
+    tags: document.getElementById('entityTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    custom: document.getElementById('entityCustom').value.trim()
+  };
+  
+  if (!entity.name) {
+    alert('Le nom est requis');
+    return;
+  }
+  
+  if (id) {
+    const idx = db.entities.findIndex(e => e.id === id);
+    if (idx > -1) db.entities[idx] = entity;
+    logActivity(`Entité modifiée: ${entity.name}`);
+  } else {
+    db.entities.push(entity);
+    logActivity(`Nouvelle entité: ${entity.name}`);
+  }
+  
+  saveDB();
+  closeModal('modalEntity');
+  currentEntity = entity;
+  render();
+}
+
+function editEntity(id) {
+  const entity = db.entities.find(e => e.id === id);
+  if (!entity) return;
+  
+  document.getElementById('entityId').value = entity.id;
+  document.getElementById('entityName').value = entity.name;
+  document.getElementById('entityType').value = entity.type;
+  document.getElementById('entityAlias').value = entity.alias || '';
+  document.getElementById('entityDesc').value = entity.desc || '';
+  document.getElementById('entityDate').value = entity.date || '';
+  document.getElementById('entityTags').value = (entity.tags || []).join(', ');
+  document.getElementById('entityCustom').value = entity.custom || '';
+  document.getElementById('modalEntityTitle').textContent = 'Modifier l\'entité';
+  
+  openModal('entity');
+}
+
+function deleteEntity(id) {
+  if (!confirm('Supprimer cette entité et toutes ses relations/notes?')) return;
+  
+  const entity = db.entities.find(e => e.id === id);
+  db.entities = db.entities.filter(e => e.id !== id);
+  db.relations = db.relations.filter(r => r.from !== id && r.to !== id);
+  db.notes = db.notes.filter(n => n.entityId !== id);
+  
+  if (entity) logActivity(`Entité supprimée: ${entity.name}`);
+  
+  currentEntity = null;
+  saveDB();
+  render();
+  document.getElementById('detailView').innerHTML = '<div class="empty-state"><h3>Entité supprimée</h3></div>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RELATIONS
+// ═══════════════════════════════════════════════════════════════
+function openRelationModal(fromId) {
+  populateEntitySelects();
+  if (fromId) {
+    document.getElementById('relationFrom').value = fromId;
+  }
+  openModal('relation');
+}
+
+function populateEntitySelects() {
+  const selects = ['relationFrom', 'relationTo', 'eventEntities'];
+  const options = db.entities.map(e => `<option value="${e.id}">${e.name} (${getTypeLabel(e.type)})</option>`).join('');
+  
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = options;
+  });
+}
+
+function saveRelation() {
+  const relation = {
+    id: genId(),
+    from: document.getElementById('relationFrom').value,
+    type: document.getElementById('relationType').value.trim(),
+    to: document.getElementById('relationTo').value,
+    notes: document.getElementById('relationNotes').value.trim()
+  };
+  
+  if (!relation.type || relation.from === relation.to) {
+    alert('Relation invalide');
+    return;
+  }
+  
+  db.relations.push(relation);
+  
+  if (document.getElementById('relationBidirectional').checked) {
+    db.relations.push({
+      id: genId(),
+      from: relation.to,
+      type: relation.type,
+      to: relation.from,
+      notes: relation.notes
+    });
+  }
+  
+  const fromEntity = db.entities.find(e => e.id === relation.from);
+  const toEntity = db.entities.find(e => e.id === relation.to);
+  logActivity(`Relation: ${fromEntity?.name} → ${toEntity?.name}`);
+  
+  saveDB();
+  closeModal('modalRelation');
+  render();
+}
+
+function deleteRelation(id) {
+  db.relations = db.relations.filter(r => r.id !== id);
+  saveDB();
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NOTES
+// ═══════════════════════════════════════════════════════════════
+function openNoteModal(entityId) {
+  document.getElementById('noteEntityId').value = entityId;
+  document.getElementById('noteContent').value = '';
+  document.getElementById('noteSource').value = '';
+  document.getElementById('noteEncrypt').checked = false;
+  document.getElementById('notePassword').value = '';
+  document.getElementById('notePasswordGroup').style.display = 'none';
+  openModal('note');
+}
+
+function setupEncryptToggle() {
+  document.getElementById('noteEncrypt').onchange = function() {
+    document.getElementById('notePasswordGroup').style.display = this.checked ? 'block' : 'none';
+  };
+}
+
+function saveNote() {
+  const entityId = document.getElementById('noteEntityId').value;
+  let content = document.getElementById('noteContent').value.trim();
+  const encrypt = document.getElementById('noteEncrypt').checked;
+  const password = document.getElementById('notePassword').value;
+  
+  if (!content) {
+    alert('Le contenu est requis');
+    return;
+  }
+  
+  if (encrypt && !password) {
+    alert('Mot de passe requis pour le chiffrement');
+    return;
+  }
+  
+  const note = {
+    id: genId(),
+    entityId,
+    content: encrypt ? encryptText(content, password) : content,
+    encrypted: encrypt,
+    source: document.getElementById('noteSource').value.trim(),
+    time: new Date().toISOString()
+  };
+  
+  db.notes.push(note);
+  logActivity(`Note ajoutée${encrypt ? ' (chiffrée)' : ''}`);
+  
+  saveDB();
+  closeModal('modalNote');
+  render();
+}
+
+function addQuickNote(encrypt) {
+  const content = document.getElementById('quickNote').value.trim();
+  if (!content) return;
+  
+  let finalContent = content;
+  if (encrypt) {
+    const password = prompt('Mot de passe pour chiffrer:');
+    if (!password) return;
+    finalContent = encryptText(content, password);
+  }
+  
+  const note = {
+    id: genId(),
+    entityId: currentEntity?.id || null,
+    content: finalContent,
+    encrypted: encrypt,
+    source: 'Note rapide',
+    time: new Date().toISOString()
+  };
+  
+  db.notes.push(note);
+  logActivity(`Note rapide${encrypt ? ' chiffrée' : ''}`);
+  
+  document.getElementById('quickNote').value = '';
+  saveDB();
+  render();
+}
+
+function deleteNote(id) {
+  db.notes = db.notes.filter(n => n.id !== id);
+  saveDB();
+  render();
+}
+
+function promptDecrypt(noteId) {
+  document.getElementById('decryptNoteId').value = noteId;
+  document.getElementById('decryptPassword').value = '';
+  openModal('decrypt');
+}
+
+function decryptNote() {
+  const noteId = document.getElementById('decryptNoteId').value;
+  const password = document.getElementById('decryptPassword').value;
+  
+  const note = db.notes.find(n => n.id === noteId);
+  if (!note) return;
+  
+  try {
+    const decrypted = decryptText(note.content, password);
+    alert('Contenu déchiffré:\n\n' + decrypted);
+  } catch (e) {
+    alert('Mot de passe incorrect');
+  }
+  
+  closeModal('modalDecrypt');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════════════
+function saveEvent() {
+  const event = {
+    id: genId(),
+    date: document.getElementById('eventDate').value,
+    time: document.getElementById('eventTime').value,
+    title: document.getElementById('eventTitle').value.trim(),
+    desc: document.getElementById('eventDesc').value.trim(),
+    entities: Array.from(document.getElementById('eventEntities').selectedOptions).map(o => o.value)
+  };
+  
+  if (!event.date || !event.title) {
+    alert('Date et titre requis');
+    return;
+  }
+  
+  db.events.push(event);
+  logActivity(`Événement: ${event.title}`);
+  
+  saveDB();
+  closeModal('modalEvent');
+  render();
+}
+
+function deleteEvent(id) {
+  db.events = db.events.filter(e => e.id !== id);
+  saveDB();
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRYPTO (Simple XOR - for demo, use Web Crypto API for real use)
+// ═══════════════════════════════════════════════════════════════
+function encryptText(text, password) {
+  const encoded = btoa(unescape(encodeURIComponent(text)));
+  let result = '';
+  for (let i = 0; i < encoded.length; i++) {
+    result += String.fromCharCode(encoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+  }
+  return btoa(result);
+}
+
+function decryptText(encrypted, password) {
+  const decoded = atob(encrypted);
+  let result = '';
+  for (let i = 0; i < decoded.length; i++) {
+    result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+  }
+  return decodeURIComponent(escape(atob(result)));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GRAPH VIEW
+// ═══════════════════════════════════════════════════════════════
+let graphZoom = 1;
+let graphOffset = { x: 0, y: 0 };
+let nodePositions = {};
+
+function renderGraph() {
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2, 2);
+  
+  const width = canvas.offsetWidth;
+  const height = canvas.offsetHeight;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  
+  ctx.fillStyle = '#0f1115';
+  ctx.fillRect(0, 0, width, height);
+  
+  if (db.entities.length === 0) {
+    ctx.fillStyle = '#71717a';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Ajoutez des entités pour voir le graphe', centerX, centerY);
+    return;
+  }
+  
+  // Position nodes in circle
+  const radius = Math.min(width, height) * 0.35 * graphZoom;
+  db.entities.forEach((e, i) => {
+    const angle = (i / db.entities.length) * Math.PI * 2 - Math.PI / 2;
+    nodePositions[e.id] = {
+      x: centerX + Math.cos(angle) * radius + graphOffset.x,
+      y: centerY + Math.sin(angle) * radius + graphOffset.y
+    };
+  });
+  
+  // Draw relations
+  ctx.strokeStyle = '#2d323c';
+  ctx.lineWidth = 1;
+  db.relations.forEach(r => {
+    const from = nodePositions[r.from];
+    const to = nodePositions[r.to];
+    if (from && to) {
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+    }
+  });
+  
+  // Draw nodes
+  const typeColors = {
+    person: '#3b82f6',
+    org: '#8b5cf6',
+    place: '#22c55e',
+    event: '#f59e0b',
+    object: '#ec4899'
+  };
+  
+  db.entities.forEach(e => {
+    const pos = nodePositions[e.id];
+    const nodeRadius = 20 * graphZoom;
+    
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, nodeRadius, 0, Math.PI * 2);
+    ctx.fillStyle = typeColors[e.type] || '#3b82f6';
+    ctx.fill();
+    
+    if (currentEntity?.id === e.id) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    
+    ctx.fillStyle = '#fff';
+    ctx.font = `${10 * graphZoom}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(e.name.substring(0, 12), pos.x, pos.y + nodeRadius + 12);
+  });
+}
+
+function resetGraph() {
+  graphZoom = 1;
+  graphOffset = { x: 0, y: 0 };
+  renderGraph();
+}
+
+function zoomGraph(factor) {
+  graphZoom *= factor;
+  graphZoom = Math.max(0.5, Math.min(2, graphZoom));
+  renderGraph();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS & UI
+// ═══════════════════════════════════════════════════════════════
+function setupTabs() {
+  // Entity type tabs
+  document.querySelectorAll('.entity-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.entity-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentTypeFilter = tab.dataset.type;
+      renderEntityList();
+    };
+  });
+  
+  // Main tabs
+  document.querySelectorAll('.main-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      document.getElementById('detailView').style.display = 'none';
+      document.getElementById('timelineView').style.display = 'none';
+      document.getElementById('graphView').style.display = 'none';
+      
+      const view = tab.dataset.view;
+      document.getElementById(view + 'View').style.display = view === 'graph' ? 'block' : 'block';
+      
+      if (view === 'graph') {
+        setTimeout(renderGraph, 100);
+      }
+    };
+  });
+}
+
+function setupSearch() {
+  const input = document.getElementById('globalSearch');
+  input.oninput = () => renderEntityList();
+  
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      input.focus();
+    }
+  });
+}
+
+function openModal(type) {
+  if (type === 'entity') {
+    document.getElementById('entityId').value = '';
+    document.getElementById('entityName').value = '';
+    document.getElementById('entityAlias').value = '';
+    document.getElementById('entityDesc').value = '';
+    document.getElementById('entityDate').value = '';
+    document.getElementById('entityTags').value = '';
+    document.getElementById('entityCustom').value = '';
+    document.getElementById('modalEntityTitle').textContent = 'Nouvelle entité';
+  } else if (type === 'relation') {
+    populateEntitySelects();
+    document.getElementById('relationType').value = '';
+    document.getElementById('relationNotes').value = '';
+    document.getElementById('relationBidirectional').checked = false;
+  } else if (type === 'event') {
+    populateEntitySelects();
+    document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('eventTime').value = '';
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventDesc').value = '';
+  }
+  
+  document.getElementById('modal' + capitalize(type)).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORT/EXPORT
+// ═══════════════════════════════════════════════════════════════
+function exportData() {
+  const data = JSON.stringify(db, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nexus-investigation-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  logActivity('Données exportées');
+}
+
+function importData() {
+  document.getElementById('importFile').click();
+}
+
+document.getElementById('importFile').onchange = async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  try {
+    const text = await file.text();
+    const imported = JSON.parse(text);
+    
+    if (imported.entities) {
+      if (confirm(`Importer ${imported.entities.length} entités, ${imported.relations?.length || 0} relations, ${imported.notes?.length || 0} notes? Cela écrasera les données actuelles.`)) {
+        db = imported;
+        saveDB();
+        currentEntity = null;
+        render();
+        logActivity('Données importées');
+      }
+    }
+  } catch (err) {
+    alert('Erreur d\'import: ' + err.message);
+  }
+  
+  e.target.value = '';
+};
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function getTypeLabel(type) {
+  const labels = { person: 'Personne', org: 'Org', place: 'Lieu', event: 'Événement', object: 'Objet' };
+  return labels[type] || type;
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function logActivity(text) {
+  db.activity.push({ time: new Date().toISOString(), text });
+  if (db.activity.length > 100) db.activity = db.activity.slice(-100);
+}
+
+// Escape key closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// Click outside modal closes it
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>
