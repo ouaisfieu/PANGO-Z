@@ -2389,6 +2389,116 @@ function dateStr() { return new Date().toISOString().split('T')[0]; }
 function download(content, filename, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], {type})); a.download = filename; a.click(); }
 function showOutput(id, text) { const el = document.getElementById(id); el.textContent = text; el.style.display = 'block'; }
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
+
+/* =========================================================
+   MATRIX / LOREM IPSUM – FLUX TEMPS RÉEL (ÉCRAN BAS)
+   Corrige l’absence de génération + rendu pro
+   ========================================================= */
+
+/* ---------- DATASET ---------- */
+const MATRIX_STREAM = [
+  {
+    label: "MATRIX::NODE-01",
+    type: "text",
+    content: "Lorem ipsum dolor sit amet, systema Matrix init. Humani somniant dum machinae vigilant. Codex fluens, veritas occultata."
+  },
+  {
+    label: "ZION::ARCHIVE-ALPHA",
+    type: "text",
+    content: "Consectetur adipiscing elit. Zion ultima civitas humana, sub terra latens, resistentia structurata sed fragilis."
+  },
+  {
+    label: "AGENT::SMITH-REPL",
+    type: "text",
+    content: "Sed do eiusmod tempor incididunt. Virus logicus in codice, identitas multiplicata, control absolutus."
+  },
+  {
+    label: "RED_PILL::PROTOCOL",
+    type: "text",
+    content: "Ut enim ad minim veniam. Electio simulata: libertas vel ignorantia, utrumque scriptum in codice."
+  },
+  {
+    label: "ORACLE::CACHE",
+    type: "text",
+    content: "Duis aute irure dolor in reprehenderit. Praedictio non est fatum sed probabilitas."
+  }
+];
+
+/* ---------- CIBLES DOM ---------- */
+const container = document.getElementById("mediaContainer");
+const label = document.getElementById("mediaLabel");
+const status = document.getElementById("screenStatus");
+const loader = document.getElementById("screenLoader");
+const loaderBar = document.getElementById("loaderBar");
+
+/* ---------- ÉTAT ---------- */
+let index = 0;
+let progress = 0;
+let interval;
+
+/* ---------- INIT ---------- */
+function bootMatrixFeed() {
+  status.textContent = "INITIALIZING MATRIX…";
+  loader.classList.remove("hidden");
+
+  interval = setInterval(() => {
+    progress += 10;
+    loaderBar.style.width = progress + "%";
+
+    if (progress >= 100) {
+      clearInterval(interval);
+      loader.classList.add("hidden");
+      status.textContent = "MATRIX ONLINE";
+      startFeed();
+    }
+  }, 200);
+}
+
+/* ---------- FLUX ---------- */
+function startFeed() {
+  renderItem(MATRIX_STREAM[index]);
+
+  setInterval(() => {
+    index = (index + 1) % MATRIX_STREAM.length;
+    glitch();
+    renderItem(MATRIX_STREAM[index]);
+  }, 4200);
+}
+
+/* ---------- RENDER ---------- */
+function renderItem(item) {
+  container.innerHTML = `
+    <div style="
+      padding:18px;
+      font-family:ui-monospace,monospace;
+      font-size:13px;
+      line-height:1.7;
+      color:#7cffc4;
+      white-space:pre-wrap;
+      background:radial-gradient(circle at top, rgba(124,255,196,.08), transparent 60%);
+    ">
+${item.content}
+    </div>
+  `;
+  label.textContent = item.label;
+  container.classList.add("loaded");
+}
+
+/* ---------- GLITCH ---------- */
+function glitch() {
+  container.classList.add("glitching");
+  setTimeout(() => container.classList.remove("glitching"), 180);
+
+  const gLine = document.getElementById("glitchLine");
+  gLine.style.top = Math.random() * 100 + "%";
+  gLine.style.opacity = 1;
+  setTimeout(() => gLine.style.opacity = 0, 120);
+}
+
+/* ---------- LANCEMENT ---------- */
+document.addEventListener("DOMContentLoaded", bootMatrixFeed);
+
+
 </script>
 </body>
 </html>
