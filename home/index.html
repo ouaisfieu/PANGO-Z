@@ -208,6 +208,8 @@ footer{border-top:1px solid var(--border);padding:3rem 0;text-align:center;font-
       <a href="#contact">Contact</a>
       <a href="#cibles">Cibles</a>
       <a href="https://ouaisfieu.github.io/offre/" >Jobs</a>
+      <a href="https://ouaisfieu.github.io/offre/" >Jobs</a>
+      <a href="https://ouaisfieu.github.io/offre/" >Jobs</a>
     </nav>
   </div>
 </header>
@@ -406,6 +408,39 @@ footer{border-top:1px solid var(--border);padding:3rem 0;text-align:center;font-
   </div>
 </section>
 
+<div class="screen-wrapper" onclick="toggleFold()">
+    <div class="screen-container" id="screenContainer">
+      <div class="screen-frame">
+        <div class="screen-header">
+          <div class="led led-green"></div>
+          <div class="led led-red" id="ledRed"></div>
+          <div class="led led-purple"></div>
+          <span class="screen-status" id="screenStatus">LOADING...</span>
+        </div>
+        <div class="screen-display" onclick="event.stopPropagation(); openModal()">
+          <!-- Loader -->
+          <div class="screen-loader" id="screenLoader">
+            <div class="loader-spinner"></div>
+            <div class="loader-text" id="loaderText">Chargement des flux...</div>
+            <div class="loader-progress"><div class="loader-bar" id="loaderBar"></div></div>
+          </div>
+          <div class="media-container" id="mediaContainer"></div>
+          <div class="scanlines"></div>
+          <div class="mire"></div>
+          <div class="vignette"></div>
+          <div class="reflet"></div>
+          <div class="glitch-line" id="glitchLine"></div>
+          <div class="glitch-overlay" id="glitchOverlay"></div>
+          <div class="media-label" id="mediaLabel">---</div>
+        </div>
+        <div class="screen-nav" id="screenNav"></div>
+      </div>
+    </div>
+  </div>
+  <p class="hint">[ clic écran → ouvrir ]</p>
+  <div class="thumbnails" id="thumbnails"></div>
+</section>
+        
 </main>
 
 <footer><p>© CCPLC — Collectif Citoyen pour la Participation Libre <br/>(et Consciente)</p></footer>
