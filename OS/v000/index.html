@@ -2292,12 +2292,8 @@ function renderGraph() {
   const canvas = document.getElementById('graphCanvas');
   const ctx = canvas.getContext('2d');
   
-  // Sauvegarder AVANT de modifier
-  const w = canvas.offsetWidth;
-  const h = canvas.offsetHeight;
-  
-  canvas.width = w * 2;
-  canvas.height = h * 2;
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
   ctx.scale(2, 2);
   
   const w = canvas.offsetWidth;
