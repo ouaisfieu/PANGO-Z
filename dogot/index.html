@@ -1,0 +1,763 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS — Intelligence Workbench v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#0c0d10;--surface:#14161a;--card:#1c1e24;--border:#2a2d35;--text:#e4e4e7;--muted:#71717a;--accent:#3b82f6;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--pink:#ec4899;--purple:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:13px}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo{font-weight:700;font-size:15px;color:var(--accent)}.logo span{color:var(--muted);font-size:10px;margin-left:6px}
+.nav-tabs{display:flex;gap:2px;flex:1}
+.nav-tab{padding:8px 14px;background:transparent;border:none;color:var(--muted);cursor:pointer;border-radius:6px;font-size:12px;transition:all 0.15s}
+.nav-tab:hover{background:var(--card);color:var(--text)}.nav-tab.active{background:var(--accent);color:white}
+.header-actions{display:flex;gap:6px}
+.btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s}
+.btn:hover{background:var(--border)}.btn-primary{background:var(--accent);border-color:var(--accent)}.btn-sm{padding:4px 8px;font-size:11px}
+.btn-danger{color:var(--red)}.btn-danger:hover{background:rgba(239,68,68,0.1)}.btn-purple{background:var(--purple);border-color:var(--purple)}
+main{flex:1;display:flex;overflow:hidden}
+.panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}.panel:last-child{border-right:none}
+.panel-header{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.panel-title{font-weight:600;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}.panel-content{flex:1;overflow-y:auto;padding:10px}
+.tab-content{display:none;flex:1;overflow:hidden}.tab-content.active{display:flex}
+.entities-view{display:flex;flex:1}.entity-list-panel{width:280px}.entity-detail-panel{flex:1;display:flex;flex-direction:column}
+.entity-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all 0.15s}
+.entity-item:hover{border-color:var(--accent)}.entity-item.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.entity-name{font-weight:600;font-size:13px;margin-bottom:3px}.entity-meta{font-size:11px;color:var(--muted);display:flex;gap:8px}
+.entity-type{font-size:9px;padding:2px 6px;border-radius:3px;text-transform:uppercase;font-weight:600}
+.type-person{background:rgba(59,130,246,0.2);color:#60a5fa}.type-org{background:rgba(139,92,246,0.2);color:#a78bfa}
+.type-place{background:rgba(34,197,94,0.2);color:#4ade80}.type-event{background:rgba(245,158,11,0.2);color:#fbbf24}
+.type-object{background:rgba(236,72,153,0.2);color:#f472b6}.type-document{background:rgba(113,113,122,0.2);color:#a1a1aa}
+.type-ally{background:rgba(34,197,94,0.2);color:#4ade80}.type-target{background:rgba(245,158,11,0.2);color:#fbbf24}
+.type-adversary{background:rgba(239,68,68,0.2);color:#f87171}.type-undecided{background:rgba(113,113,122,0.2);color:#a1a1aa}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}.tag{font-size:10px;padding:2px 6px;background:var(--border);border-radius:3px;color:var(--muted)}
+.detail-scroll{flex:1;overflow-y:auto;padding:16px}.detail-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:16px}
+.detail-title{font-size:20px;font-weight:600}.detail-subtitle{color:var(--muted);font-size:12px;margin-top:4px}
+.section{margin-bottom:20px}.section-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.field-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.field{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:8px 10px}
+.field-label{font-size:10px;color:var(--muted);margin-bottom:2px}.field-value{font-size:13px;word-break:break-word}
+.plaidoyer-view{display:flex;flex:1;overflow:hidden}
+.plaidoyer-sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:8px;overflow-y:auto}
+.plaidoyer-content{flex:1;overflow-y:auto;padding:16px}
+.plaid-nav-section{margin-bottom:16px}.plaid-nav-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:6px;padding:0 8px}
+.plaid-nav-item{padding:8px 12px;border-radius:5px;cursor:pointer;font-size:12px;margin-bottom:2px;transition:all 0.15s;display:flex;align-items:center;gap:8px}
+.plaid-nav-item:hover{background:var(--card)}.plaid-nav-item.active{background:var(--accent);color:white}.plaid-nav-item .emoji{width:20px;text-align:center}
+.plaid-section{display:none}.plaid-section.active{display:block}
+.plaid-card{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px}
+.plaid-card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.plaid-card-title{font-weight:600;font-size:14px}.plaid-card-body{padding:16px}
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.swot-cell{border-radius:6px;padding:12px;min-height:150px}
+.swot-cell h4{font-size:12px;margin-bottom:8px;font-weight:600}
+.swot-strengths{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3)}.swot-strengths h4{color:var(--green)}
+.swot-weaknesses{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3)}.swot-weaknesses h4{color:var(--red)}
+.swot-opportunities{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3)}.swot-opportunities h4{color:var(--accent)}
+.swot-threats{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3)}.swot-threats h4{color:var(--amber)}
+.swot-items{list-style:none}.swot-item{display:flex;align-items:start;gap:6px;padding:4px 0;font-size:12px}.swot-item .bullet{flex-shrink:0}
+.swot-input{width:100%;background:transparent;border:none;border-bottom:1px dashed var(--border);color:var(--text);font-size:12px;padding:4px 0;margin-top:8px}
+.swot-input:focus{outline:none;border-color:var(--accent)}
+.pestel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pestel-cell{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;min-height:120px}
+.pestel-cell h4{font-size:11px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.pestel-political h4{color:var(--accent)}.pestel-economic h4{color:var(--green)}.pestel-social h4{color:var(--pink)}
+.pestel-tech h4{color:var(--purple)}.pestel-env h4{color:#84cc16}.pestel-legal h4{color:var(--amber)}
+.toc-container{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toc-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+.toc-box h4{font-size:12px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.toc-vision h4{color:var(--accent)}.toc-values h4{color:var(--green)}.toc-hypotheses h4{color:var(--amber)}.toc-missions h4{color:var(--purple)}
+.tree-container{text-align:center;padding:20px 0}
+.tree-trunk{display:inline-block;background:var(--amber);color:var(--bg);padding:16px 32px;border-radius:8px;font-weight:600;margin:20px 0}
+.tree-branches,.tree-roots{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.tree-branch{background:rgba(34,197,94,0.2);border:1px solid var(--green);color:var(--text);padding:10px 16px;border-radius:6px;font-size:12px;min-width:120px}
+.tree-root{background:rgba(239,68,68,0.2);border:1px solid var(--red);color:var(--text);padding:10px 16px;border-radius:6px;font-size:12px;min-width:120px}
+.tree-arrow-up,.tree-arrow-down{text-align:center;color:var(--muted);padding:8px;font-size:18px}
+.message-builder{display:grid;gap:12px}
+.message-part{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px}
+.message-part label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.message-part textarea{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:13px;min-height:60px;resize:vertical}
+.message-part textarea:focus{outline:none;border-color:var(--accent)}
+.progress-table{width:100%;border-collapse:collapse}
+.progress-table th,.progress-table td{border:1px solid var(--border);padding:10px;text-align:left;font-size:12px}
+.progress-table th{background:var(--surface);font-weight:600;text-transform:uppercase;font-size:10px}
+.progress-expect{background:rgba(113,113,122,0.1)}.progress-like{background:rgba(245,158,11,0.1)}.progress-love{background:rgba(34,197,94,0.1)}
+.strategy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.strategy-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;cursor:pointer;transition:all 0.2s}
+.strategy-card:hover{border-color:var(--accent)}.strategy-card.selected{border-color:var(--accent);background:rgba(59,130,246,0.1)}
+.strategy-card h5{font-size:12px;margin-bottom:4px}.strategy-card p{font-size:10px;color:var(--muted)}
+.target-profile{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.target-profile-header{padding:12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.target-avatar{width:48px;height:48px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
+.target-info h4{font-size:14px;margin-bottom:2px}.target-info p{font-size:11px;color:var(--muted)}.target-profile-body{padding:12px}
+.tools-view{flex:1;display:flex;overflow:hidden}
+.tools-sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:8px;overflow-y:auto}
+.tools-content{flex:1;overflow-y:auto;padding:16px}
+.tool-nav-item{padding:8px 12px;border-radius:5px;cursor:pointer;font-size:12px;margin-bottom:2px;transition:all 0.15s}
+.tool-nav-item:hover{background:var(--card)}.tool-nav-item.active{background:var(--accent);color:white}
+.tool-section{display:none}.tool-section.active{display:block}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:12px}
+.tool-card h3{font-size:14px;margin-bottom:12px}
+textarea.tool-input,input.tool-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:5px;font-family:'Monaco','Consolas',monospace;font-size:12px;resize:vertical}
+textarea.tool-input{min-height:100px}textarea.tool-input:focus,input.tool-input:focus{outline:none;border-color:var(--accent)}
+.tool-output{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:10px;margin-top:10px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto}
+.tool-row{display:flex;gap:8px;margin-bottom:10px}.tool-row .btn{flex-shrink:0}
+.import-view{flex:1;display:flex;flex-direction:column;padding:16px;overflow-y:auto}
+.drop-zone{border:2px dashed var(--border);border-radius:8px;padding:40px;text-align:center;margin-bottom:16px;transition:all 0.2s;cursor:pointer}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(59,130,246,0.05)}
+.drop-zone h3{margin-bottom:8px}.drop-zone p{color:var(--muted);font-size:12px}
+.search-view{flex:1;display:flex;flex-direction:column;padding:16px}
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-bar input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:6px;font-size:14px}
+.search-bar input:focus{outline:none;border-color:var(--accent)}.search-results{flex:1;overflow-y:auto}
+.timeline-view{flex:1;overflow-y:auto;padding:16px}
+.timeline-item{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.timeline-item::before{content:"";position:absolute;left:9px;top:20px;bottom:0;width:2px;background:var(--border)}
+.timeline-item:last-child::before{display:none}
+.timeline-dot{width:20px;height:20px;border-radius:50%;background:var(--card);border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.timeline-content{flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px}
+.timeline-date{font-size:12px;color:var(--accent);font-weight:500;margin-bottom:4px}
+.timeline-title{font-weight:600;margin-bottom:4px}.timeline-desc{font-size:12px;color:var(--muted)}
+.graph-view{flex:1;position:relative}#graphCanvas{width:100%;height:100%}
+.graph-controls{position:absolute;bottom:12px;left:12px;display:flex;gap:4px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:100%;max-width:500px;max-height:85vh;display:flex;flex-direction:column}
+.modal-lg{max-width:700px}
+.modal-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-weight:600}.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:16px;overflow-y:auto;flex:1}.modal-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.form-group{margin-bottom:14px}.form-group label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:5px;font-size:13px;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent)}
+.form-group textarea{min-height:80px;resize:vertical}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}.empty-state h3{color:var(--text);margin-bottom:8px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:10px 20px;border-radius:6px;font-size:13px;z-index:9999;animation:toastIn 0.3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+.filter-row{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:4px;font-size:11px;cursor:pointer;color:var(--muted)}
+.filter-btn:hover{border-color:var(--muted);color:var(--text)}.filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+input[type="file"]{display:none}
+.scale-slider{display:flex;align-items:center;gap:12px}
+.scale-slider input[type="range"]{flex:1;height:6px;-webkit-appearance:none;background:var(--border);border-radius:3px}
+.scale-slider input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--accent);border-radius:50%;cursor:pointer}
+.scale-value{min-width:30px;text-align:center;font-size:12px;font-weight:600}
+.note-item{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:10px;margin-bottom:6px}
+.note-header{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px}
+.note-content{font-size:13px;line-height:1.5;white-space:pre-wrap}.note-encrypted{color:var(--amber);cursor:pointer}
+.relation-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:5px;margin-bottom:4px;cursor:pointer}
+.relation-item:hover{border-color:var(--accent)}.relation-type{font-size:11px;color:var(--muted);min-width:80px}.relation-target{flex:1;font-weight:500}
+.smart-builder{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+.smart-label{font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px;text-align:center}
+.smart-s{background:rgba(59,130,246,0.2);color:#60a5fa}.smart-m{background:rgba(139,92,246,0.2);color:#a78bfa}
+.smart-a{background:rgba(34,197,94,0.2);color:#4ade80}.smart-r{background:rgba(245,158,11,0.2);color:#fbbf24}
+.smart-t{background:rgba(236,72,153,0.2);color:#f472b6}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">◈ NEXUS <span>v2</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="entities">Entités</button>
+    <button class="nav-tab" data-tab="plaidoyer">Plaidoyer</button>
+    <button class="nav-tab" data-tab="timeline">Timeline</button>
+    <button class="nav-tab" data-tab="graph">Graphe</button>
+    <button class="nav-tab" data-tab="search">Recherche</button>
+    <button class="nav-tab" data-tab="import">Import</button>
+    <button class="nav-tab" data-tab="tools">Outils</button>
+  </div>
+  <div class="header-actions">
+    <button class="btn" onclick="exportAll()">📤 Export</button>
+    <button class="btn" onclick="lockDB()">🔒</button>
+  </div>
+</header>
+<main>
+  <!-- ENTITIES -->
+  <div class="tab-content active" id="tabEntities">
+    <div class="entities-view">
+      <div class="panel entity-list-panel">
+        <div class="panel-header"><span class="panel-title">Entités</span><button class="btn btn-sm" onclick="openEntityModal()">+</button></div>
+        <div style="padding:8px;border-bottom:1px solid var(--border)">
+          <input type="text" id="entitySearch" placeholder="Rechercher..." style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:4px;font-size:12px" oninput="filterEntities()">
+          <div class="filter-row" style="margin-top:6px" id="entityFilters">
+            <button class="filter-btn active" data-type="all">Tout</button>
+            <button class="filter-btn" data-type="person">👤</button>
+            <button class="filter-btn" data-type="org">🏢</button>
+            <button class="filter-btn" data-type="place">📍</button>
+            <button class="filter-btn" data-type="event">📅</button>
+          </div>
+        </div>
+        <div class="panel-content" id="entityList"></div>
+      </div>
+      <div class="panel entity-detail-panel">
+        <div class="detail-scroll" id="entityDetail"><div class="empty-state"><h3>Aucune entité</h3><p>Sélectionnez ou créez une entité</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAIDOYER -->
+  <div class="tab-content" id="tabPlaidoyer">
+    <div class="plaidoyer-view">
+      <div class="plaidoyer-sidebar">
+        <div class="plaid-nav-section">
+          <div class="plaid-nav-title">Cadrage</div>
+          <div class="plaid-nav-item active" data-plaid="toc"><span class="emoji">🎯</span> Théorie du changement</div>
+          <div class="plaid-nav-item" data-plaid="swot"><span class="emoji">📊</span> Analyse SWOT</div>
+        </div>
+        <div class="plaid-nav-section">
+          <div class="plaid-nav-title">Analyse</div>
+          <div class="plaid-nav-item" data-plaid="pestel"><span class="emoji">🔍</span> PESTEL</div>
+          <div class="plaid-nav-item" data-plaid="tree"><span class="emoji">🌳</span> Arbre à problèmes</div>
+          <div class="plaid-nav-item" data-plaid="5why"><span class="emoji">❓</span> 5 Pourquoi</div>
+        </div>
+        <div class="plaid-nav-section">
+          <div class="plaid-nav-title">Stratégie</div>
+          <div class="plaid-nav-item" data-plaid="objectives"><span class="emoji">✅</span> Objectifs SMART</div>
+          <div class="plaid-nav-item" data-plaid="strategies"><span class="emoji">♟️</span> Choix stratégie</div>
+        </div>
+        <div class="plaid-nav-section">
+          <div class="plaid-nav-title">Acteurs</div>
+          <div class="plaid-nav-item" data-plaid="targets"><span class="emoji">🎯</span> Fiches cibles</div>
+        </div>
+        <div class="plaid-nav-section">
+          <div class="plaid-nav-title">Communication</div>
+          <div class="plaid-nav-item" data-plaid="message"><span class="emoji">💬</span> Messages</div>
+        </div>
+        <div class="plaid-nav-section">
+          <div class="plaid-nav-title">Suivi</div>
+          <div class="plaid-nav-item" data-plaid="progress"><span class="emoji">📈</span> Progress markers</div>
+          <div class="plaid-nav-item" data-plaid="actions"><span class="emoji">📋</span> Suivi actions</div>
+        </div>
+      </div>
+      <div class="plaidoyer-content">
+        <!-- TOC -->
+        <div class="plaid-section active" id="plaidToc">
+          <h2 style="margin-bottom:16px">🎯 Théorie du Changement</h2>
+          <p style="color:var(--muted);font-size:12px;margin-bottom:20px">Définissez vision, valeurs, hypothèses et missions.</p>
+          <div class="toc-container">
+            <div class="toc-box toc-vision"><h4>🔭 Vision</h4><textarea id="tocVision" placeholder="Le futur idéal..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:12px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="toc-box toc-values"><h4>💎 Valeurs</h4><textarea id="tocValues" placeholder="Principes fondamentaux..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:12px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="toc-box toc-hypotheses"><h4>💡 Hypothèses</h4><textarea id="tocHypotheses" placeholder="Si... alors..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:12px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="toc-box toc-missions"><h4>🚀 Missions</h4><textarea id="tocMissions" placeholder="Ce que nous allons faire..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:12px" onchange="savePlaidoyer()"></textarea></div>
+          </div>
+        </div>
+        <!-- SWOT -->
+        <div class="plaid-section" id="plaidSwot">
+          <h2 style="margin-bottom:16px">📊 Analyse SWOT</h2>
+          <div class="swot-grid">
+            <div class="swot-cell swot-strengths"><h4>💪 Forces</h4><ul class="swot-items" id="swotStrengths"></ul><input type="text" class="swot-input" placeholder="+ Ajouter..." onkeypress="addSwotItem(event,'strengths')"></div>
+            <div class="swot-cell swot-weaknesses"><h4>⚠️ Faiblesses</h4><ul class="swot-items" id="swotWeaknesses"></ul><input type="text" class="swot-input" placeholder="+ Ajouter..." onkeypress="addSwotItem(event,'weaknesses')"></div>
+            <div class="swot-cell swot-opportunities"><h4>🌟 Opportunités</h4><ul class="swot-items" id="swotOpportunities"></ul><input type="text" class="swot-input" placeholder="+ Ajouter..." onkeypress="addSwotItem(event,'opportunities')"></div>
+            <div class="swot-cell swot-threats"><h4>⛈️ Menaces</h4><ul class="swot-items" id="swotThreats"></ul><input type="text" class="swot-input" placeholder="+ Ajouter..." onkeypress="addSwotItem(event,'threats')"></div>
+          </div>
+        </div>
+        <!-- PESTEL -->
+        <div class="plaid-section" id="plaidPestel">
+          <h2 style="margin-bottom:16px">🔍 Analyse PESTEL</h2>
+          <div class="pestel-grid">
+            <div class="pestel-cell pestel-political"><h4>🏛️ Politique</h4><textarea id="pestelPolitical" placeholder="Contexte politique..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="pestel-cell pestel-economic"><h4>💰 Économique</h4><textarea id="pestelEconomic" placeholder="Contexte économique..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="pestel-cell pestel-social"><h4>👥 Social</h4><textarea id="pestelSocial" placeholder="Contexte social..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="pestel-cell pestel-tech"><h4>💻 Technologique</h4><textarea id="pestelTech" placeholder="Contexte tech..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="pestel-cell pestel-env"><h4>🌿 Environnement</h4><textarea id="pestelEnv" placeholder="Contexte environnemental..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="savePlaidoyer()"></textarea></div>
+            <div class="pestel-cell pestel-legal"><h4>⚖️ Légal</h4><textarea id="pestelLegal" placeholder="Cadre légal..." style="width:100%;min-height:80px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="savePlaidoyer()"></textarea></div>
+          </div>
+        </div>
+        <!-- TREE -->
+        <div class="plaid-section" id="plaidTree">
+          <h2 style="margin-bottom:16px">🌳 Arbre à Problèmes</h2>
+          <div class="plaid-card"><div class="plaid-card-body">
+            <div class="form-group"><label>Problème central</label><input type="text" id="treeProblem" placeholder="Le problème principal..." onchange="savePlaidoyer();renderTree()"></div>
+          </div></div>
+          <div class="tree-container" id="treeViz">
+            <div class="tree-branches" id="treeBranches"></div>
+            <div class="tree-arrow-up">▲ Conséquences</div>
+            <div class="tree-trunk" id="treeTrunk">Problème</div>
+            <div class="tree-arrow-down">▼ Causes</div>
+            <div class="tree-roots" id="treeRoots"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+            <div class="plaid-card"><div class="plaid-card-header"><span class="plaid-card-title" style="color:var(--red)">Causes</span><button class="btn btn-sm" onclick="addTreeItem('causes')">+</button></div><div class="plaid-card-body" id="treeCausesList"></div></div>
+            <div class="plaid-card"><div class="plaid-card-header"><span class="plaid-card-title" style="color:var(--green)">Conséquences</span><button class="btn btn-sm" onclick="addTreeItem('consequences')">+</button></div><div class="plaid-card-body" id="treeConsequencesList"></div></div>
+          </div>
+        </div>
+        <!-- 5WHY -->
+        <div class="plaid-section" id="plaid5why">
+          <h2 style="margin-bottom:16px">❓ Les 5 Pourquoi</h2>
+          <div class="plaid-card"><div class="plaid-card-body">
+            <div class="form-group"><label style="color:var(--accent)">Problème initial</label><input type="text" id="why0" placeholder="Décrivez le problème..." onchange="savePlaidoyer()"></div>
+            <div class="form-group"><label style="color:var(--purple)">1. Pourquoi ?</label><input type="text" id="why1" placeholder="Parce que..." onchange="savePlaidoyer()"></div>
+            <div class="form-group"><label style="color:var(--purple)">2. Pourquoi ?</label><input type="text" id="why2" placeholder="Parce que..." onchange="savePlaidoyer()"></div>
+            <div class="form-group"><label style="color:var(--purple)">3. Pourquoi ?</label><input type="text" id="why3" placeholder="Parce que..." onchange="savePlaidoyer()"></div>
+            <div class="form-group"><label style="color:var(--purple)">4. Pourquoi ?</label><input type="text" id="why4" placeholder="Parce que..." onchange="savePlaidoyer()"></div>
+            <div class="form-group"><label style="color:var(--purple)">5. Pourquoi ?</label><input type="text" id="why5" placeholder="Parce que..." onchange="savePlaidoyer()"></div>
+          </div></div>
+        </div>
+        <!-- OBJECTIVES -->
+        <div class="plaid-section" id="plaidObjectives">
+          <h2 style="margin-bottom:16px">✅ Objectifs SMART</h2>
+          <div class="plaid-card"><div class="plaid-card-header"><span class="plaid-card-title">Générateur</span></div><div class="plaid-card-body">
+            <p style="font-size:12px;margin-bottom:12px;color:var(--muted)">D'ici <strong>[temps]</strong>, obtenir <strong>[quoi]</strong> en faisant <strong>[comment]</strong> grâce à <strong>[moyens]</strong>.</p>
+            <div class="smart-builder">
+              <span class="smart-label smart-t">T</span><input type="text" id="smartTime" placeholder="Ex: décembre 2025" onchange="generateSmartObjective()">
+              <span class="smart-label smart-s">S</span><input type="text" id="smartSpecific" placeholder="Ex: l'adoption de la loi X" onchange="generateSmartObjective()">
+              <span class="smart-label smart-m">M</span><input type="text" id="smartMeasurable" placeholder="Ex: 100 000 signatures" onchange="generateSmartObjective()">
+              <span class="smart-label smart-a">A</span><input type="text" id="smartAction" placeholder="Ex: campagne de pétition" onchange="generateSmartObjective()">
+              <span class="smart-label smart-r">R</span><input type="text" id="smartRealistic" placeholder="Ex: réseau associatif" onchange="generateSmartObjective()">
+            </div>
+            <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:6px;border-left:3px solid var(--accent)">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">OBJECTIF</div>
+              <div id="smartResult" style="font-size:13px">Remplissez les champs...</div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px" onclick="saveSmartObjective()">💾 Sauvegarder</button>
+          </div></div>
+          <div class="plaid-card" style="margin-top:16px"><div class="plaid-card-header"><span class="plaid-card-title">Objectifs enregistrés</span></div><div class="plaid-card-body" id="objectivesList"></div></div>
+        </div>
+        <!-- STRATEGIES -->
+        <div class="plaid-section" id="plaidStrategies">
+          <h2 style="margin-bottom:16px">♟️ Stratégies</h2>
+          <div class="strategy-grid" id="strategyGrid">
+            <div class="strategy-card" data-strategy="research" onclick="toggleStrategy(this)"><h5>📚 Recherche</h5><p>Preuves scientifiques</p></div>
+            <div class="strategy-card" data-strategy="mobilization" onclick="toggleStrategy(this)"><h5>✊ Mobilisation</h5><p>Actions citoyennes</p></div>
+            <div class="strategy-card" data-strategy="legal" onclick="toggleStrategy(this)"><h5>⚖️ Juridique</h5><p>Procès, plaintes</p></div>
+            <div class="strategy-card" data-strategy="opposition" onclick="toggleStrategy(this)"><h5>🎯 Opposition</h5><p>Adversaire symbolique</p></div>
+            <div class="strategy-card" data-strategy="boycott" onclick="toggleStrategy(this)"><h5>🚫 Boycott</h5><p>Pression économique</p></div>
+            <div class="strategy-card" data-strategy="negotiation" onclick="toggleStrategy(this)"><h5>🤝 Négociation</h5><p>Dialogue direct</p></div>
+            <div class="strategy-card" data-strategy="petition" onclick="toggleStrategy(this)"><h5>📝 Pétition</h5><p>Signatures</p></div>
+            <div class="strategy-card" data-strategy="lobbying" onclick="toggleStrategy(this)"><h5>🏛️ Lobbying</h5><p>Décideurs</p></div>
+            <div class="strategy-card" data-strategy="alliance" onclick="toggleStrategy(this)"><h5>🔗 Alliance</h5><p>Coalition</p></div>
+          </div>
+        </div>
+        <!-- TARGETS -->
+        <div class="plaid-section" id="plaidTargets">
+          <h2 style="margin-bottom:16px">🎯 Fiches de Ciblage</h2>
+          <div id="targetProfilesList"></div>
+          <button class="btn btn-primary" onclick="addTargetProfile()" style="margin-top:12px">+ Ajouter une cible</button>
+        </div>
+        <!-- MESSAGE -->
+        <div class="plaid-section" id="plaidMessage">
+          <h2 style="margin-bottom:16px">💬 Messages</h2>
+          <div class="plaid-card"><div class="plaid-card-body">
+            <div class="message-builder">
+              <div class="message-part" style="border-left:3px solid var(--accent)"><label>🎣 Accroche</label><textarea id="msgHook" placeholder="Ex: Chaque seconde..." onchange="savePlaidoyer()"></textarea></div>
+              <div class="message-part" style="border-left:3px solid var(--red)"><label>⚠️ Problème</label><textarea id="msgProblem" placeholder="Le problème..." onchange="savePlaidoyer()"></textarea></div>
+              <div class="message-part" style="border-left:3px solid var(--amber)"><label>❗ Importance</label><textarea id="msgImportance" placeholder="Pourquoi maintenant?" onchange="savePlaidoyer()"></textarea></div>
+              <div class="message-part" style="border-left:3px solid var(--purple)"><label>👤 Cible</label><textarea id="msgTarget" placeholder="À qui?" onchange="savePlaidoyer()"></textarea></div>
+              <div class="message-part" style="border-left:3px solid var(--green)"><label>✋ Action</label><textarea id="msgAction" placeholder="Que faire?" onchange="savePlaidoyer()"></textarea></div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px" onclick="saveMessage()">💾 Sauvegarder</button>
+          </div></div>
+          <div class="plaid-card" style="margin-top:16px"><div class="plaid-card-header"><span class="plaid-card-title">Messages</span></div><div class="plaid-card-body" id="messagesList"></div></div>
+        </div>
+        <!-- PROGRESS -->
+        <div class="plaid-section" id="plaidProgress">
+          <h2 style="margin-bottom:16px">📈 Progress Markers</h2>
+          <div class="plaid-card"><div class="plaid-card-header"><span class="plaid-card-title">Par acteur</span><button class="btn btn-sm" onclick="addProgressMarker()">+</button></div><div class="plaid-card-body">
+            <table class="progress-table"><thead><tr><th style="width:150px">Acteur</th><th class="progress-expect">Expect</th><th class="progress-like">Like</th><th class="progress-love">Love</th></tr></thead><tbody id="progressBody"></tbody></table>
+          </div></div>
+        </div>
+        <!-- ACTIONS -->
+        <div class="plaid-section" id="plaidActions">
+          <h2 style="margin-bottom:16px">📋 Suivi des Actions</h2>
+          <div class="plaid-card"><div class="plaid-card-header"><span class="plaid-card-title">Actions</span><button class="btn btn-sm btn-primary" onclick="addPlaidoyerAction()">+</button></div><div class="plaid-card-body" id="actionsList"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- TIMELINE -->
+  <div class="tab-content" id="tabTimeline"><div class="timeline-view" id="timelineContent"><div class="empty-state"><h3>Timeline vide</h3></div></div></div>
+  <!-- GRAPH -->
+  <div class="tab-content" id="tabGraph"><div class="graph-view"><canvas id="graphCanvas"></canvas><div class="graph-controls"><button class="btn btn-sm" onclick="resetGraph()">↻</button><button class="btn btn-sm" onclick="zoomGraph(1.2)">+</button><button class="btn btn-sm" onclick="zoomGraph(0.8)">−</button></div></div></div>
+  <!-- SEARCH -->
+  <div class="tab-content" id="tabSearch"><div class="search-view"><div class="search-bar"><input type="text" id="globalSearch" placeholder="Recherche..." onkeyup="performSearch(event)"><button class="btn btn-primary" onclick="performSearch()">🔍</button></div><div class="search-results" id="searchResults"><div class="empty-state"><p>Tapez pour rechercher</p></div></div></div></div>
+  <!-- IMPORT -->
+  <div class="tab-content" id="tabImport"><div class="import-view"><div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"><h3>📁 Glissez des fichiers</h3><p>JSON, CSV, XLSX, VCF, TXT</p></div><input type="file" id="fileInput" multiple onchange="handleFileSelect(event)"></div></div>
+  <!-- TOOLS -->
+  <div class="tab-content" id="tabTools">
+    <div class="tools-view">
+      <div class="tools-sidebar">
+        <div class="tool-nav-item active" data-tool="extraction">🔍 Extraction</div>
+        <div class="tool-nav-item" data-tool="crypto">🔐 Crypto</div>
+        <div class="tool-nav-item" data-tool="osint">🌐 OSINT</div>
+        <div class="tool-nav-item" data-tool="export">📤 Export</div>
+      </div>
+      <div class="tools-content">
+        <div class="tool-section active" id="toolExtraction">
+          <div class="tool-card"><h3>🔍 Extraction d'entités</h3><textarea class="tool-input" id="extractInput" placeholder="Collez du texte..."></textarea><div class="tool-row" style="margin-top:10px"><button class="btn btn-primary" onclick="extractEntities()">Extraire</button></div><div class="tool-output" id="extractOutput" style="display:none"></div></div>
+        </div>
+        <div class="tool-section" id="toolCrypto">
+          <div class="tool-card"><h3>🔐 AES-256</h3><textarea class="tool-input" id="cryptoInput" placeholder="Texte..."></textarea><div class="tool-row" style="margin-top:10px"><input class="tool-input" id="cryptoPassword" type="password" placeholder="Mot de passe" style="flex:1"><button class="btn btn-primary" onclick="encryptText()">Chiffrer</button><button class="btn" onclick="decryptText()">Déchiffrer</button></div><div class="tool-output" id="cryptoOutput" style="display:none"></div></div>
+        </div>
+        <div class="tool-section" id="toolOsint">
+          <div class="tool-card"><h3>🔗 Analyse URL</h3><div class="tool-row"><input class="tool-input" id="urlInput" placeholder="https://..." style="flex:1"><button class="btn btn-primary" onclick="parseURL()">Analyser</button></div><div class="tool-output" id="urlOutput" style="display:none"></div></div>
+          <div class="tool-card"><h3>📍 GPS</h3><div class="tool-row"><input class="tool-input" id="gpsInput" placeholder="50.8503, 4.3517" style="flex:1"><button class="btn btn-primary" onclick="convertGPS()">Convertir</button></div><div class="tool-output" id="gpsOutput" style="display:none"></div></div>
+        </div>
+        <div class="tool-section" id="toolExport">
+          <div class="tool-card"><h3>📤 Export données</h3><div class="tool-row"><button class="btn btn-primary" onclick="exportAs('json')">JSON</button><button class="btn" onclick="exportAs('csv')">CSV</button><button class="btn" onclick="exportAs('md')">Markdown</button></div></div>
+          <div class="tool-card"><h3>🌐 Export Univers HTML</h3><p style="font-size:11px;color:var(--muted);margin-bottom:10px">Génère un rapport HTML complet et navigable de votre univers.</p><div class="tool-row"><input type="text" id="universeTitle" class="tool-input" placeholder="Titre de l'univers (ex: Seigneur des Anneaux)" style="flex:1"><button class="btn btn-primary" onclick="exportUniverseHTML()">🌍 Générer</button></div></div>
+          <div class="tool-card"><h3>📑 Export Plaidoyer</h3><button class="btn btn-purple" onclick="exportPlaidoyer()">📋 Plan complet</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<!-- MODALS -->
+<div class="modal-overlay" id="entityModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="entityModalTitle">Nouvelle entité</span><button class="modal-close" onclick="closeModal('entityModal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label>Nom *</label><input type="text" id="entityName"></div><div class="form-group"><label>Type</label><select id="entityType"><option value="person">👤 Personne</option><option value="org">🏢 Organisation</option><option value="place">📍 Lieu</option><option value="event">📅 Événement</option><option value="document">📄 Document</option></select></div></div>
+      <div class="form-group"><label>Alias</label><input type="text" id="entityAlias" placeholder="Autres noms..."></div>
+      <div class="form-group"><label>Description</label><textarea id="entityDesc"></textarea></div>
+      <div class="form-row"><div class="form-group"><label>Date</label><input type="date" id="entityDate"></div><div class="form-group"><label>Tags</label><input type="text" id="entityTags" placeholder="tag1, tag2"></div></div>
+      <div class="form-group"><label>Rôle plaidoyer</label><select id="entityRole"><option value="">— Aucun —</option><option value="ally">🟢 Allié</option><option value="target">🟡 Cible</option><option value="adversary">🔴 Adversaire</option><option value="undecided">⚪ Indécis</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('entityModal')">Annuler</button><button class="btn btn-primary" onclick="saveEntity()">Enregistrer</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="relationModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Nouvelle relation</span><button class="modal-close" onclick="closeModal('relationModal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>De</label><select id="relFrom"></select></div>
+      <div class="form-group"><label>Type</label><input type="text" id="relType" placeholder="connaît, travaille pour..."></div>
+      <div class="form-group"><label>Vers</label><select id="relTo"></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('relationModal')">Annuler</button><button class="btn btn-primary" onclick="saveRelation()">Enregistrer</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="noteModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Note</span><button class="modal-close" onclick="closeModal('noteModal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Contenu</label><textarea id="noteContent" style="min-height:120px"></textarea></div>
+      <div class="form-group"><label>Source</label><input type="text" id="noteSource" placeholder="URL, document..."></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('noteModal')">Annuler</button><button class="btn btn-primary" onclick="saveNote()">Enregistrer</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="targetModal">
+  <div class="modal modal-lg">
+    <div class="modal-header"><span class="modal-title">Fiche cible</span><button class="modal-close" onclick="closeModal('targetModal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label>Nom</label><input type="text" id="targetName"></div><div class="form-group"><label>Représentant</label><input type="text" id="targetRep"></div></div>
+      <div class="form-group"><label>Objectifs de la cible</label><textarea id="targetObjectives"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Intérêt (1-5)</label><div class="scale-slider"><input type="range" id="targetInterest" min="1" max="5" value="3"><span class="scale-value">3</span></div></div>
+        <div class="form-group"><label>Influence (1-5)</label><div class="scale-slider"><input type="range" id="targetInfluence" min="1" max="5" value="3"><span class="scale-value">3</span></div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Position</label><select id="targetPosition"><option value="strongly-opposed">Très opposée</option><option value="opposed">Opposée</option><option value="neutral" selected>Neutre</option><option value="favorable">Favorable</option><option value="strongly-favorable">Très favorable</option></select></div>
+        <div class="form-group"><label>Accès</label><select id="targetAccess"><option value="none">Aucun</option><option value="indirect">Indirect</option><option value="direct">Direct</option></select></div>
+      </div>
+      <div class="form-group"><label>Action souhaitée</label><input type="text" id="targetActionWanted" placeholder="Ce qu'on veut qu'elle fasse"></div>
+      <div class="form-group"><label>Détonateur (argument qui touche)</label><textarea id="targetTrigger"></textarea></div>
+      <div class="form-group"><label>Canaux</label><input type="text" id="targetChannels" placeholder="Email, LinkedIn..."></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('targetModal')">Annuler</button><button class="btn btn-primary" onclick="saveTargetProfile()">Enregistrer</button></div>
+  </div>
+</div>
+<script>
+let db={entities:[],relations:[],notes:[],events:[],files:[],plaidoyer:{toc:{vision:'',values:'',hypotheses:'',missions:''},swot:{strengths:[],weaknesses:[],opportunities:[],threats:[]},pestel:{political:'',economic:'',social:'',tech:'',env:'',legal:''},tree:{problem:'',causes:[],consequences:[]},fiveWhy:['','','','','',''],objectives:[],strategies:[],messages:[],targets:[],progress:[],actions:[]},activity:[]};
+let currentEntityId=null,currentTargetId=null,graphZoom=1;
+
+document.addEventListener('DOMContentLoaded',()=>{loadDB();setupEventListeners();renderEntities();renderPlaidoyerData();});
+
+function setupEventListeners(){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+  document.querySelectorAll('#entityFilters .filter-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#entityFilters .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');filterEntities();}));
+  document.querySelectorAll('.plaid-nav-item').forEach(i=>i.addEventListener('click',()=>switchPlaidSection(i.dataset.plaid)));
+  document.querySelectorAll('.tool-nav-item').forEach(i=>i.addEventListener('click',()=>switchToolSection(i.dataset.tool)));
+  document.querySelectorAll('.scale-slider input').forEach(s=>s.addEventListener('input',e=>e.target.nextElementSibling.textContent=e.target.value));
+  const dz=document.getElementById('dropZone');
+  if(dz){dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));dz.addEventListener('drop',handleDrop);}
+  document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='k'){e.preventDefault();switchTab('search');document.getElementById('globalSearch').focus();}if(e.ctrlKey&&e.key==='n'){e.preventDefault();openEntityModal();}if(e.key==='Escape')closeAllModals();});
+}
+
+async function loadDB(){try{const r=indexedDB.open('NexusDB',2);r.onupgradeneeded=e=>{const i=e.target.result;if(!i.objectStoreNames.contains('data'))i.createObjectStore('data');};r.onsuccess=e=>{const i=e.target.result,t=i.transaction('data','readonly'),s=t.objectStore('data'),g=s.get('main');g.onsuccess=()=>{if(g.result){db={...db,...g.result};renderEntities();renderPlaidoyerData();}};};}catch(e){console.error(e);}}
+async function saveDB(){try{const r=indexedDB.open('NexusDB',2);r.onsuccess=e=>{const i=e.target.result,t=i.transaction('data','readwrite'),s=t.objectStore('data');s.put(db,'main');};}catch(e){console.error(e);}}
+
+function switchTab(t){document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelector(`.nav-tab[data-tab="${t}"]`).classList.add('active');document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');if(t==='graph')renderGraph();if(t==='timeline')renderTimeline();}
+function switchPlaidSection(s){document.querySelectorAll('.plaid-nav-item').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.plaid-section').forEach(x=>x.classList.remove('active'));document.querySelector(`.plaid-nav-item[data-plaid="${s}"]`).classList.add('active');document.getElementById('plaid'+s.charAt(0).toUpperCase()+s.slice(1)).classList.add('active');}
+function switchToolSection(t){document.querySelectorAll('.tool-nav-item').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tool-section').forEach(x=>x.classList.remove('active'));document.querySelector(`.tool-nav-item[data-tool="${t}"]`).classList.add('active');document.getElementById('tool'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');}
+
+function renderEntities(){const l=document.getElementById('entityList'),s=document.getElementById('entitySearch')?.value.toLowerCase()||'',tf=document.querySelector('#entityFilters .filter-btn.active')?.dataset.type||'all';
+let f=db.entities.filter(e=>{const m=e.name.toLowerCase().includes(s)||(e.desc||'').toLowerCase().includes(s);const mt=tf==='all'||e.type===tf;return m&&mt;});
+if(f.length===0){l.innerHTML='<div class="empty-state"><p>Aucune entité</p></div>';return;}
+l.innerHTML=f.map(e=>`<div class="entity-item ${currentEntityId===e.id?'active':''}" onclick="selectEntity('${e.id}')"><div style="display:flex;justify-content:space-between;align-items:start"><span class="entity-name">${esc(e.name)}</span><span class="entity-type type-${e.type}">${e.type}</span></div>${e.role?`<span class="entity-type type-${e.role}" style="margin-top:4px">${e.role}</span>`:''}</div>`).join('');}
+function filterEntities(){renderEntities();}
+function selectEntity(id){currentEntityId=id;renderEntities();renderEntityDetail(id);}
+function renderEntityDetail(id){const e=db.entities.find(x=>x.id===id);if(!e)return;const rels=db.relations.filter(r=>r.from===id||r.to===id),notes=db.notes.filter(n=>n.entityId===id);
+document.getElementById('entityDetail').innerHTML=`<div class="detail-header"><div><div class="detail-title">${esc(e.name)}</div><div class="detail-subtitle"><span class="entity-type type-${e.type}">${e.type}</span>${e.role?`<span class="entity-type type-${e.role}" style="margin-left:6px">${e.role}</span>`:''}</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openEntityModal('${id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteEntity('${id}')">🗑️</button></div></div>
+${e.desc?`<div class="section"><div class="section-title">Description</div><div style="line-height:1.6">${esc(e.desc)}</div></div>`:''}
+<div class="section"><div class="section-title">Relations<button class="btn btn-sm" onclick="openRelationModal('${id}')">+</button></div>${rels.length?rels.map(r=>{const o=r.from===id?db.entities.find(x=>x.id===r.to):db.entities.find(x=>x.id===r.from);const d=r.from===id?'→':'←';return `<div class="relation-item" onclick="selectEntity('${o?.id}')"><span class="relation-type">${d} ${esc(r.type)}</span><span class="relation-target">${esc(o?.name||'?')}</span></div>`;}).join(''):'<div style="color:var(--muted);font-size:12px">Aucune</div>'}</div>
+<div class="section"><div class="section-title">Notes<button class="btn btn-sm" onclick="openNoteModal('${id}')">+</button></div>${notes.length?notes.map(n=>`<div class="note-item"><div class="note-header"><span>${n.source||'Note'}</span><span>${new Date(n.time).toLocaleString()}</span></div><div class="note-content">${esc(n.content)}</div></div>`).join(''):'<div style="color:var(--muted);font-size:12px">Aucune</div>'}</div>`;}
+
+function openEntityModal(id){const m=document.getElementById('entityModal'),t=document.getElementById('entityModalTitle');
+if(id&&typeof id==='string'&&id.length>10){const e=db.entities.find(x=>x.id===id);if(e){t.textContent='Modifier';document.getElementById('entityName').value=e.name;document.getElementById('entityType').value=e.type;document.getElementById('entityAlias').value=e.alias||'';document.getElementById('entityDesc').value=e.desc||'';document.getElementById('entityDate').value=e.date||'';document.getElementById('entityTags').value=(e.tags||[]).join(', ');document.getElementById('entityRole').value=e.role||'';m.dataset.editId=id;}}
+else{t.textContent='Nouvelle entité';document.getElementById('entityName').value='';document.getElementById('entityType').value='person';document.getElementById('entityAlias').value='';document.getElementById('entityDesc').value='';document.getElementById('entityDate').value='';document.getElementById('entityTags').value='';document.getElementById('entityRole').value='';delete m.dataset.editId;}
+m.classList.add('open');}
+function saveEntity(){const m=document.getElementById('entityModal'),n=document.getElementById('entityName').value.trim();if(!n)return toast('Nom requis');
+const e={id:m.dataset.editId||genId(),name:n,type:document.getElementById('entityType').value,alias:document.getElementById('entityAlias').value.trim(),desc:document.getElementById('entityDesc').value.trim(),date:document.getElementById('entityDate').value,tags:document.getElementById('entityTags').value.split(',').map(t=>t.trim()).filter(Boolean),role:document.getElementById('entityRole').value};
+if(m.dataset.editId){const i=db.entities.findIndex(x=>x.id===m.dataset.editId);if(i!==-1)db.entities[i]={...db.entities[i],...e};}else{db.entities.push(e);}
+saveDB();renderEntities();if(currentEntityId===e.id)renderEntityDetail(e.id);closeModal('entityModal');toast('Enregistré');}
+function deleteEntity(id){if(!confirm('Supprimer?'))return;db.entities=db.entities.filter(e=>e.id!==id);db.relations=db.relations.filter(r=>r.from!==id&&r.to!==id);db.notes=db.notes.filter(n=>n.entityId!==id);saveDB();currentEntityId=null;renderEntities();document.getElementById('entityDetail').innerHTML='<div class="empty-state"><h3>Supprimé</h3></div>';toast('Supprimé');}
+function openRelationModal(fromId){const m=document.getElementById('relationModal'),fs=document.getElementById('relFrom'),ts=document.getElementById('relTo'),opts=db.entities.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');fs.innerHTML=opts;ts.innerHTML=opts;if(fromId)fs.value=fromId;document.getElementById('relType').value='';m.classList.add('open');}
+function saveRelation(){const f=document.getElementById('relFrom').value,t=document.getElementById('relTo').value,ty=document.getElementById('relType').value.trim();if(!ty)return toast('Type requis');if(f===t)return toast('Entités différentes');db.relations.push({id:genId(),from:f,to:t,type:ty});saveDB();if(currentEntityId)renderEntityDetail(currentEntityId);closeModal('relationModal');toast('Relation créée');}
+function openNoteModal(eid){const m=document.getElementById('noteModal');m.dataset.entityId=eid;document.getElementById('noteContent').value='';document.getElementById('noteSource').value='';m.classList.add('open');}
+function saveNote(){const m=document.getElementById('noteModal'),c=document.getElementById('noteContent').value.trim();if(!c)return toast('Contenu requis');db.notes.push({id:genId(),entityId:m.dataset.entityId,content:c,source:document.getElementById('noteSource').value.trim(),time:Date.now()});saveDB();if(currentEntityId)renderEntityDetail(currentEntityId);closeModal('noteModal');toast('Note ajoutée');}
+
+// PLAIDOYER
+function renderPlaidoyerData(){const p=db.plaidoyer;document.getElementById('tocVision').value=p.toc.vision||'';document.getElementById('tocValues').value=p.toc.values||'';document.getElementById('tocHypotheses').value=p.toc.hypotheses||'';document.getElementById('tocMissions').value=p.toc.missions||'';renderSwot();document.getElementById('pestelPolitical').value=p.pestel.political||'';document.getElementById('pestelEconomic').value=p.pestel.economic||'';document.getElementById('pestelSocial').value=p.pestel.social||'';document.getElementById('pestelTech').value=p.pestel.tech||'';document.getElementById('pestelEnv').value=p.pestel.env||'';document.getElementById('pestelLegal').value=p.pestel.legal||'';document.getElementById('treeProblem').value=p.tree.problem||'';renderTree();for(let i=0;i<=5;i++)document.getElementById('why'+i).value=p.fiveWhy[i]||'';renderObjectives();(p.strategies||[]).forEach(s=>{const c=document.querySelector(`.strategy-card[data-strategy="${s}"]`);if(c)c.classList.add('selected');});renderMessages();renderTargetProfiles();renderProgress();renderPlaidoyerActions();}
+function savePlaidoyer(){const p=db.plaidoyer;p.toc.vision=document.getElementById('tocVision').value;p.toc.values=document.getElementById('tocValues').value;p.toc.hypotheses=document.getElementById('tocHypotheses').value;p.toc.missions=document.getElementById('tocMissions').value;p.pestel.political=document.getElementById('pestelPolitical').value;p.pestel.economic=document.getElementById('pestelEconomic').value;p.pestel.social=document.getElementById('pestelSocial').value;p.pestel.tech=document.getElementById('pestelTech').value;p.pestel.env=document.getElementById('pestelEnv').value;p.pestel.legal=document.getElementById('pestelLegal').value;p.tree.problem=document.getElementById('treeProblem').value;for(let i=0;i<=5;i++)p.fiveWhy[i]=document.getElementById('why'+i).value;saveDB();}
+function renderSwot(){['strengths','weaknesses','opportunities','threats'].forEach(t=>{const u=document.getElementById('swot'+t.charAt(0).toUpperCase()+t.slice(1));u.innerHTML=(db.plaidoyer.swot[t]||[]).map((i,x)=>`<li class="swot-item"><span class="bullet">•</span><span style="flex:1">${esc(i)}</span><span style="cursor:pointer;color:var(--red)" onclick="removeSwotItem('${t}',${x})">×</span></li>`).join('');});}
+function addSwotItem(e,t){if(e.key!=='Enter')return;const i=e.target,v=i.value.trim();if(!v)return;db.plaidoyer.swot[t]=db.plaidoyer.swot[t]||[];db.plaidoyer.swot[t].push(v);i.value='';renderSwot();saveDB();}
+function removeSwotItem(t,i){db.plaidoyer.swot[t].splice(i,1);renderSwot();saveDB();}
+function renderTree(){const p=db.plaidoyer.tree;document.getElementById('treeTrunk').textContent=p.problem||'Problème';document.getElementById('treeBranches').innerHTML=(p.consequences||[]).map(c=>`<div class="tree-branch">${esc(c)}</div>`).join('');document.getElementById('treeRoots').innerHTML=(p.causes||[]).map(c=>`<div class="tree-root">${esc(c)}</div>`).join('');document.getElementById('treeCausesList').innerHTML=(p.causes||[]).map((c,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" value="${esc(c)}" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:12px" onchange="updateTreeItem('causes',${i},this.value)"><button class="btn btn-sm btn-danger" onclick="removeTreeItem('causes',${i})">×</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Aucune</div>';document.getElementById('treeConsequencesList').innerHTML=(p.consequences||[]).map((c,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" value="${esc(c)}" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:12px" onchange="updateTreeItem('consequences',${i},this.value)"><button class="btn btn-sm btn-danger" onclick="removeTreeItem('consequences',${i})">×</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Aucune</div>';}
+function addTreeItem(t){const v=prompt(t==='causes'?'Cause:':'Conséquence:');if(!v)return;db.plaidoyer.tree[t]=db.plaidoyer.tree[t]||[];db.plaidoyer.tree[t].push(v);renderTree();saveDB();}
+function updateTreeItem(t,i,v){db.plaidoyer.tree[t][i]=v;renderTree();saveDB();}
+function removeTreeItem(t,i){db.plaidoyer.tree[t].splice(i,1);renderTree();saveDB();}
+function generateSmartObjective(){const t=document.getElementById('smartTime').value,s=document.getElementById('smartSpecific').value,m=document.getElementById('smartMeasurable').value,a=document.getElementById('smartAction').value,r=document.getElementById('smartRealistic').value;let res='D\'ici '+(t||'[temps]')+', obtenir '+(s||'[objectif]');if(m)res+=' ('+m+')';res+=' en menant '+(a||'[action]')+' grâce à '+(r||'[moyens]')+'.';document.getElementById('smartResult').textContent=res;}
+function saveSmartObjective(){const r=document.getElementById('smartResult').textContent;if(r.includes('['))return toast('Complétez les champs');db.plaidoyer.objectives=db.plaidoyer.objectives||[];db.plaidoyer.objectives.push({id:genId(),text:r,created:Date.now(),status:'active'});renderObjectives();saveDB();toast('Objectif enregistré');['smartTime','smartSpecific','smartMeasurable','smartAction','smartRealistic'].forEach(i=>document.getElementById(i).value='');document.getElementById('smartResult').textContent='Remplissez les champs...';}
+function renderObjectives(){const c=document.getElementById('objectivesList');c.innerHTML=(db.plaidoyer.objectives||[]).map((o,i)=>`<div style="padding:12px;background:var(--surface);border-radius:6px;margin-bottom:8px;border-left:3px solid ${o.status==='completed'?'var(--green)':'var(--accent)'}"><div style="display:flex;justify-content:space-between"><div style="flex:1;font-size:13px">${esc(o.text)}</div><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="toggleObjectiveStatus(${i})">${o.status==='completed'?'↩️':'✅'}</button><button class="btn btn-sm btn-danger" onclick="removeObjective(${i})">×</button></div></div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Aucun objectif</div>';}
+function toggleObjectiveStatus(i){db.plaidoyer.objectives[i].status=db.plaidoyer.objectives[i].status==='completed'?'active':'completed';renderObjectives();saveDB();}
+function removeObjective(i){db.plaidoyer.objectives.splice(i,1);renderObjectives();saveDB();}
+function toggleStrategy(el){el.classList.toggle('selected');const s=el.dataset.strategy;db.plaidoyer.strategies=db.plaidoyer.strategies||[];if(el.classList.contains('selected')){if(!db.plaidoyer.strategies.includes(s))db.plaidoyer.strategies.push(s);}else{db.plaidoyer.strategies=db.plaidoyer.strategies.filter(x=>x!==s);}saveDB();}
+function renderTargetProfiles(){const c=document.getElementById('targetProfilesList');c.innerHTML=(db.plaidoyer.targets||[]).map((t,i)=>`<div class="target-profile"><div class="target-profile-header"><div class="target-avatar">🎯</div><div class="target-info"><h4>${esc(t.name)}</h4><p>${esc(t.rep||'')}</p></div><div style="margin-left:auto;display:flex;gap:4px"><button class="btn btn-sm" onclick="editTargetProfile(${i})">✏️</button><button class="btn btn-sm btn-danger" onclick="removeTargetProfile(${i})">×</button></div></div><div class="target-profile-body"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px"><div>Intérêt: ${t.interest}/5</div><div>Influence: ${t.influence}/5</div><div>Position: ${t.position}</div></div>${t.actionWanted?`<div style="margin-top:8px;font-size:12px">Action: ${esc(t.actionWanted)}</div>`:''}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Aucune cible</div>';}
+function addTargetProfile(){currentTargetId=null;['targetName','targetRep','targetObjectives','targetActionWanted','targetTrigger','targetChannels'].forEach(i=>document.getElementById(i).value='');document.getElementById('targetInterest').value=3;document.getElementById('targetInfluence').value=3;document.getElementById('targetPosition').value='neutral';document.getElementById('targetAccess').value='indirect';document.querySelectorAll('.scale-value').forEach(v=>v.textContent='3');document.getElementById('targetModal').classList.add('open');}
+function editTargetProfile(i){currentTargetId=i;const t=db.plaidoyer.targets[i];document.getElementById('targetName').value=t.name||'';document.getElementById('targetRep').value=t.rep||'';document.getElementById('targetObjectives').value=t.objectives||'';document.getElementById('targetInterest').value=t.interest||3;document.getElementById('targetInfluence').value=t.influence||3;document.getElementById('targetPosition').value=t.position||'neutral';document.getElementById('targetAccess').value=t.access||'indirect';document.getElementById('targetActionWanted').value=t.actionWanted||'';document.getElementById('targetTrigger').value=t.trigger||'';document.getElementById('targetChannels').value=t.channels||'';document.querySelectorAll('.scale-slider').forEach(s=>{const i=s.querySelector('input');s.querySelector('.scale-value').textContent=i.value;});document.getElementById('targetModal').classList.add('open');}
+function saveTargetProfile(){const t={name:document.getElementById('targetName').value,rep:document.getElementById('targetRep').value,objectives:document.getElementById('targetObjectives').value,interest:document.getElementById('targetInterest').value,influence:document.getElementById('targetInfluence').value,position:document.getElementById('targetPosition').value,access:document.getElementById('targetAccess').value,actionWanted:document.getElementById('targetActionWanted').value,trigger:document.getElementById('targetTrigger').value,channels:document.getElementById('targetChannels').value};db.plaidoyer.targets=db.plaidoyer.targets||[];if(currentTargetId!==null){db.plaidoyer.targets[currentTargetId]=t;}else{db.plaidoyer.targets.push(t);}renderTargetProfiles();saveDB();closeModal('targetModal');toast('Cible enregistrée');}
+function removeTargetProfile(i){if(!confirm('Supprimer?'))return;db.plaidoyer.targets.splice(i,1);renderTargetProfiles();saveDB();}
+function saveMessage(){const m={id:genId(),hook:document.getElementById('msgHook').value,problem:document.getElementById('msgProblem').value,importance:document.getElementById('msgImportance').value,target:document.getElementById('msgTarget').value,action:document.getElementById('msgAction').value,created:Date.now()};if(!m.hook&&!m.problem)return toast('Ajoutez contenu');db.plaidoyer.messages=db.plaidoyer.messages||[];db.plaidoyer.messages.push(m);renderMessages();saveDB();toast('Message enregistré');['msgHook','msgProblem','msgImportance','msgTarget','msgAction'].forEach(i=>document.getElementById(i).value='');}
+function renderMessages(){const c=document.getElementById('messagesList');c.innerHTML=(db.plaidoyer.messages||[]).map((m,i)=>`<div style="padding:12px;background:var(--surface);border-radius:6px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:10px;color:var(--muted)">${new Date(m.created).toLocaleDateString()}</span><button class="btn btn-sm btn-danger" onclick="removeMessage(${i})">×</button></div>${m.hook?`<p style="font-size:12px;margin-bottom:4px"><strong style="color:var(--accent)">Accroche:</strong> ${esc(m.hook)}</p>`:''}${m.problem?`<p style="font-size:12px;margin-bottom:4px"><strong style="color:var(--red)">Problème:</strong> ${esc(m.problem)}</p>`:''}${m.action?`<p style="font-size:12px"><strong style="color:var(--green)">Action:</strong> ${esc(m.action)}</p>`:''}</div>`).join('')||'<div style="color:var(--muted);font-size:12px">Aucun message</div>';}
+function removeMessage(i){db.plaidoyer.messages.splice(i,1);renderMessages();saveDB();}
+function addProgressMarker(){const a=prompt('Acteur:');if(!a)return;db.plaidoyer.progress=db.plaidoyer.progress||[];db.plaidoyer.progress.push({actor:a,expect:'',like:'',love:''});renderProgress();saveDB();}
+function renderProgress(){const b=document.getElementById('progressBody');b.innerHTML=(db.plaidoyer.progress||[]).map((p,i)=>`<tr><td style="font-weight:500">${esc(p.actor)}<br><button class="btn btn-sm btn-danger" style="margin-top:4px" onclick="removeProgress(${i})">×</button></td><td class="progress-expect"><textarea style="width:100%;min-height:60px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="updateProgress(${i},'expect',this.value)">${esc(p.expect)}</textarea></td><td class="progress-like"><textarea style="width:100%;min-height:60px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="updateProgress(${i},'like',this.value)">${esc(p.like)}</textarea></td><td class="progress-love"><textarea style="width:100%;min-height:60px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-size:11px" onchange="updateProgress(${i},'love',this.value)">${esc(p.love)}</textarea></td></tr>`).join('');}
+function updateProgress(i,f,v){db.plaidoyer.progress[i][f]=v;saveDB();}
+function removeProgress(i){db.plaidoyer.progress.splice(i,1);renderProgress();saveDB();}
+function addPlaidoyerAction(){const t=prompt('Action:');if(!t)return;db.plaidoyer.actions=db.plaidoyer.actions||[];db.plaidoyer.actions.push({id:genId(),title:t,status:'planned',deadline:'',indicator:'',created:Date.now()});renderPlaidoyerActions();saveDB();}
+function renderPlaidoyerActions(){const c=document.getElementById('actionsList');c.innerHTML=(db.plaidoyer.actions||[]).map((a,i)=>`<div style="padding:12px;background:var(--surface);border-radius:6px;margin-bottom:8px;border-left:3px solid ${a.status==='completed'?'var(--green)':a.status==='ongoing'?'var(--amber)':'var(--border)'}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>${esc(a.title)}</strong><div style="display:flex;gap:4px"><select style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:4px;font-size:11px" onchange="updatePlaidAction(${i},'status',this.value)"><option value="planned" ${a.status==='planned'?'selected':''}>📋 Planifiée</option><option value="ongoing" ${a.status==='ongoing'?'selected':''}>🔄 En cours</option><option value="completed" ${a.status==='completed'?'selected':''}>✅ Terminée</option></select><button class="btn btn-sm btn-danger" onclick="removePlaidAction(${i})">×</button></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px"><div><label style="color:var(--muted)">Échéance:</label><input type="date" value="${a.deadline||''}" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:4px;font-size:11px" onchange="updatePlaidAction(${i},'deadline',this.value)"></div><div><label style="color:var(--muted)">Indicateur:</label><input type="text" value="${esc(a.indicator||'')}" placeholder="Comment mesurer?" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:4px;font-size:11px" onchange="updatePlaidAction(${i},'indicator',this.value)"></div></div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">Aucune action</div>';}
+function updatePlaidAction(i,f,v){db.plaidoyer.actions[i][f]=v;renderPlaidoyerActions();saveDB();}
+function removePlaidAction(i){db.plaidoyer.actions.splice(i,1);renderPlaidoyerActions();saveDB();}
+
+// GRAPH
+function renderGraph(){const canvas=document.getElementById('graphCanvas'),ctx=canvas.getContext('2d'),w=canvas.offsetWidth,h=canvas.offsetHeight;canvas.width=w*2;canvas.height=h*2;ctx.scale(2,2);ctx.fillStyle='#0c0d10';ctx.fillRect(0,0,w,h);if(db.entities.length===0){ctx.fillStyle='#71717a';ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText('Aucune entité',w/2,h/2);return;}
+const nodes=db.entities.map((e,i)=>{const angle=(2*Math.PI*i)/db.entities.length,radius=Math.min(w,h)*0.35;return{id:e.id,name:e.name,type:e.type,role:e.role,x:w/2+radius*Math.cos(angle),y:h/2+radius*Math.sin(angle)};});
+ctx.strokeStyle='#2a2d35';ctx.lineWidth=1;db.relations.forEach(r=>{const from=nodes.find(n=>n.id===r.from),to=nodes.find(n=>n.id===r.to);if(from&&to){ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.stroke();}});
+const colors={person:'#3b82f6',org:'#8b5cf6',place:'#22c55e',event:'#f59e0b',document:'#71717a'},roleColors={ally:'#22c55e',target:'#f59e0b',adversary:'#ef4444',undecided:'#71717a'};
+nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,20,0,Math.PI*2);ctx.fillStyle=n.role?roleColors[n.role]:colors[n.type]||'#71717a';ctx.fill();if(n.role){ctx.strokeStyle=roleColors[n.role];ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y,24,0,Math.PI*2);ctx.stroke();}ctx.fillStyle='#e4e4e7';ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText(n.name.substring(0,15),n.x,n.y+35);});}
+function resetGraph(){graphZoom=1;renderGraph();}function zoomGraph(f){graphZoom*=f;renderGraph();}
+
+// TIMELINE
+function renderTimeline(){const evts=[];db.entities.forEach(e=>{if(e.date)evts.push({date:e.date,title:e.name,desc:e.desc||'',type:e.type});});db.notes.forEach(n=>{const e=db.entities.find(x=>x.id===n.entityId);evts.push({date:new Date(n.time).toISOString().split('T')[0],title:'Note: '+(e?.name||'?'),desc:n.content.substring(0,100),type:'note'});});evts.sort((a,b)=>new Date(b.date)-new Date(a.date));const c=document.getElementById('timelineContent');if(evts.length===0){c.innerHTML='<div class="empty-state"><h3>Timeline vide</h3></div>';return;}c.innerHTML=evts.map(e=>`<div class="timeline-item"><div class="timeline-dot">${e.type==='note'?'📝':''}</div><div class="timeline-content"><div class="timeline-date">${e.date}</div><div class="timeline-title">${esc(e.title)}</div><div class="timeline-desc">${esc(e.desc)}</div></div></div>`).join('');}
+
+// SEARCH
+function performSearch(e){if(e&&e.key&&e.key!=='Enter')return;const q=document.getElementById('globalSearch').value.toLowerCase().trim();if(!q){document.getElementById('searchResults').innerHTML='<div class="empty-state"><p>Tapez pour rechercher</p></div>';return;}const results=[];db.entities.forEach(e=>{const t=[e.name,e.alias,e.desc,...(e.tags||[])].join(' ').toLowerCase();if(t.includes(q))results.push({type:'entity',item:e,context:e.desc||e.name});});const c=document.getElementById('searchResults');if(results.length===0){c.innerHTML='<div class="empty-state"><p>Aucun résultat</p></div>';return;}c.innerHTML=results.map(r=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;cursor:pointer" onclick="selectEntity('${r.item.id}');switchTab('entities')"><div style="font-weight:600;margin-bottom:4px">${esc(r.item.name)}</div><div style="font-size:12px;color:var(--muted)">${esc(r.context?.substring(0,100)||'')}</div></div>`).join('');}
+
+// IMPORT
+function handleDrop(e){e.preventDefault();document.getElementById('dropZone').classList.remove('dragover');for(const f of e.dataTransfer.files)processFile(f);}
+function handleFileSelect(e){for(const f of e.target.files)processFile(f);}
+async function processFile(f){const ext=f.name.split('.').pop().toLowerCase(),reader=new FileReader();if(ext==='json'){reader.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.entities)db.entities.push(...d.entities);else if(Array.isArray(d))d.forEach(i=>{if(i.name)db.entities.push({id:genId(),...i,type:i.type||'document'});});saveDB();renderEntities();toast('Import JSON');}catch(err){toast('Erreur JSON');}};reader.readAsText(f);}else if(ext==='xlsx'||ext==='xls'){reader.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],d=XLSX.utils.sheet_to_json(ws);d.forEach(r=>{const n=r.name||r.Name||r.nom||Object.values(r)[0];if(n)db.entities.push({id:genId(),name:String(n),type:'document',data:r});});saveDB();renderEntities();toast('Import Excel');}catch(err){toast('Erreur Excel');}};reader.readAsArrayBuffer(f);}else{reader.onload=e=>{db.entities.push({id:genId(),name:f.name,type:'document',desc:e.target.result.substring(0,1000)});saveDB();renderEntities();toast('Import: '+f.name);};reader.readAsText(f);}}
+
+// TOOLS
+function extractEntities(){const t=document.getElementById('extractInput').value;if(!t)return;const r={emails:t.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g)||[],urls:t.match(/https?:\/\/[^\s<>"{}|\\^`\[\]]+/g)||[],phones:(t.match(/(?:\+\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{2,4}[-.\s]?\d{2,4}[-.\s]?\d{0,4}/g)||[]).filter(p=>p.replace(/\D/g,'').length>=8),dates:t.match(/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}/g)||[],ips:t.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g)||[]};const o=document.getElementById('extractOutput');o.style.display='block';o.textContent=Object.entries(r).filter(([,v])=>v.length>0).map(([k,v])=>`${k.toUpperCase()} (${v.length}):\n${[...new Set(v)].join('\n')}`).join('\n\n')||'Aucune entité trouvée';}
+async function encryptAES(t,p){const e=new TextEncoder(),k=await crypto.subtle.importKey('raw',e.encode(p),'PBKDF2',false,['deriveBits','deriveKey']),s=crypto.getRandomValues(new Uint8Array(16)),dk=await crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt']),iv=crypto.getRandomValues(new Uint8Array(12)),en=await crypto.subtle.encrypt({name:'AES-GCM',iv},dk,e.encode(t)),r=new Uint8Array(s.length+iv.length+en.byteLength);r.set(s,0);r.set(iv,s.length);r.set(new Uint8Array(en),s.length+iv.length);return btoa(String.fromCharCode(...r));}
+async function decryptAES(c,p){const d=Uint8Array.from(atob(c),x=>x.charCodeAt(0)),s=d.slice(0,16),iv=d.slice(16,28),en=d.slice(28),e=new TextEncoder(),k=await crypto.subtle.importKey('raw',e.encode(p),'PBKDF2',false,['deriveBits','deriveKey']),dk=await crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['decrypt']),de=await crypto.subtle.decrypt({name:'AES-GCM',iv},dk,en);return new TextDecoder().decode(de);}
+async function encryptText(){const t=document.getElementById('cryptoInput').value,p=document.getElementById('cryptoPassword').value;if(!t||!p)return toast('Texte et mot de passe requis');try{const en=await encryptAES(t,p),o=document.getElementById('cryptoOutput');o.style.display='block';o.textContent=en;}catch(e){toast('Erreur');}}
+async function decryptText(){const t=document.getElementById('cryptoInput').value,p=document.getElementById('cryptoPassword').value;if(!t||!p)return toast('Requis');try{const de=await decryptAES(t,p),o=document.getElementById('cryptoOutput');o.style.display='block';o.textContent=de;}catch(e){toast('Échec');}}
+function parseURL(){const u=document.getElementById('urlInput').value;try{const p=new URL(u),o=document.getElementById('urlOutput');o.style.display='block';o.textContent=`Protocol: ${p.protocol}\nHost: ${p.host}\nPath: ${p.pathname}\nSearch: ${p.search}`;}catch(e){toast('URL invalide');}}
+function convertGPS(){const i=document.getElementById('gpsInput').value,o=document.getElementById('gpsOutput');o.style.display='block';const d=i.match(/(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)/);if(d){const lat=parseFloat(d[1]),lon=parseFloat(d[2]);o.textContent=`Decimal: ${lat}, ${lon}\nGoogle Maps: https://maps.google.com/?q=${lat},${lon}`;}else{toast('Format non reconnu');}}
+
+// EXPORT
+function exportAll(){exportAs('json');}
+function exportAs(f){let c,fn,t;switch(f){case'json':c=JSON.stringify(db,null,2);fn='nexus-export.json';t='application/json';break;case'csv':const h=['id','name','type','alias','desc','date','tags','role'];c=h.join(',')+'\n'+db.entities.map(e=>h.map(k=>`"${String(e[k]||'').replace(/"/g,'""')}"`).join(',')).join('\n');fn='nexus-entities.csv';t='text/csv';break;case'md':c=`# NEXUS Export\n\n## Entities\n\n`+db.entities.map(e=>`### ${e.name}\n- Type: ${e.type}\n${e.desc?`- Description: ${e.desc}\n`:''}`).join('\n');fn='nexus-export.md';t='text/markdown';break;}downloadFile(c,fn,t);}
+function exportPlaidoyer(){const p=db.plaidoyer;let m=`# Plan de Plaidoyer\n\n## 1. Théorie du Changement\n\n**Vision:** ${p.toc.vision||'_Non défini_'}\n\n**Valeurs:** ${p.toc.values||'_Non défini_'}\n\n**Hypothèses:** ${p.toc.hypotheses||'_Non défini_'}\n\n**Missions:** ${p.toc.missions||'_Non défini_'}\n\n## 2. SWOT\n\n**Forces:** ${(p.swot.strengths||[]).join(', ')||'_Aucune_'}\n\n**Faiblesses:** ${(p.swot.weaknesses||[]).join(', ')||'_Aucune_'}\n\n**Opportunités:** ${(p.swot.opportunities||[]).join(', ')||'_Aucune_'}\n\n**Menaces:** ${(p.swot.threats||[]).join(', ')||'_Aucune_'}\n\n## 3. PESTEL\n\n- Politique: ${p.pestel.political||'_Non défini_'}\n- Économique: ${p.pestel.economic||'_Non défini_'}\n- Social: ${p.pestel.social||'_Non défini_'}\n- Tech: ${p.pestel.tech||'_Non défini_'}\n- Environnement: ${p.pestel.env||'_Non défini_'}\n- Légal: ${p.pestel.legal||'_Non défini_'}\n\n## 4. Arbre à problèmes\n\n**Problème:** ${p.tree.problem||'_Non défini_'}\n\n**Causes:** ${(p.tree.causes||[]).join(', ')||'_Aucune_'}\n\n**Conséquences:** ${(p.tree.consequences||[]).join(', ')||'_Aucune_'}\n\n## 5. Objectifs\n\n`+(p.objectives||[]).map((o,i)=>`${i+1}. ${o.text}`).join('\n')+`\n\n## 6. Stratégies\n\n${(p.strategies||[]).join(', ')||'_Aucune_'}\n\n## 7. Cibles\n\n`+(p.targets||[]).map(t=>`### ${t.name}\n- Intérêt: ${t.interest}/5\n- Influence: ${t.influence}/5\n- Action: ${t.actionWanted||'_Non défini_'}\n`).join('\n');downloadFile(m,'plan-plaidoyer.md','text/markdown');toast('Plan exporté');}
+function exportUniverseHTML(){
+const title = document.getElementById('universeTitle').value || 'NEXUS Universe';
+const stats = {
+  entities: db.entities.length,
+  relations: db.relations.length,
+  notes: db.notes.length,
+  types: {},
+  roles: {ally:0,adversary:0,target:0,undecided:0}
+};
+db.entities.forEach(e => {
+  stats.types[e.type] = (stats.types[e.type]||0) + 1;
+  if(e.role) stats.roles[e.role] = (stats.roles[e.role]||0) + 1;
+});
+
+const typeIcons = {person:'👤',org:'🏢',place:'📍',event:'📅',object:'🔮',document:'📄'};
+const roleColors = {ally:'#22c55e',adversary:'#ef4444',target:'#f59e0b',undecided:'#71717a'};
+const typeColors = {person:'#3b82f6',org:'#8b5cf6',place:'#22c55e',event:'#f59e0b',object:'#ec4899',document:'#71717a'};
+
+// Group entities by type
+const byType = {};
+db.entities.forEach(e => {
+  if(!byType[e.type]) byType[e.type] = [];
+  byType[e.type].push(e);
+});
+
+// Build entity cards
+let entitySections = '';
+Object.keys(byType).sort().forEach(type => {
+  const list = byType[type];
+  entitySections += `
+  <section class="type-section" id="type-${type}">
+    <h2>${typeIcons[type]||'📦'} ${type.charAt(0).toUpperCase()+type.slice(1)}s <span class="count">(${list.length})</span></h2>
+    <div class="entity-grid">
+      ${list.map(e => {
+        const rels = db.relations.filter(r => r.from === e.id || r.to === e.id);
+        const notes = db.notes.filter(n => n.entityId === e.id);
+        return `
+        <article class="entity-card" id="entity-${e.id}" style="border-left: 4px solid ${e.role ? roleColors[e.role] : typeColors[e.type]}">
+          <header>
+            <h3>${esc(e.name)}</h3>
+            <div class="badges">
+              <span class="badge type-badge" style="background:${typeColors[e.type]}20;color:${typeColors[e.type]}">${type}</span>
+              ${e.role ? `<span class="badge role-badge" style="background:${roleColors[e.role]}20;color:${roleColors[e.role]}">${e.role}</span>` : ''}
+            </div>
+          </header>
+          ${e.alias ? `<p class="alias">alias: ${esc(e.alias)}</p>` : ''}
+          ${e.desc ? `<p class="desc">${esc(e.desc)}</p>` : ''}
+          ${e.date ? `<p class="date">📅 ${e.date}</p>` : ''}
+          ${e.tags?.length ? `<div class="tags">${e.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>` : ''}
+          ${rels.length ? `
+          <div class="relations">
+            <strong>Relations (${rels.length}):</strong>
+            <ul>${rels.slice(0,5).map(r => {
+              const other = r.from === e.id ? db.entities.find(x=>x.id===r.to) : db.entities.find(x=>x.id===r.from);
+              const dir = r.from === e.id ? '→' : '←';
+              return `<li>${dir} <em>${esc(r.type)}</em> <a href="#entity-${other?.id}">${esc(other?.name||'?')}</a></li>`;
+            }).join('')}${rels.length > 5 ? `<li>... et ${rels.length-5} autres</li>` : ''}</ul>
+          </div>` : ''}
+          ${notes.length ? `<div class="notes"><strong>Notes:</strong>${notes.map(n=>`<blockquote>${esc(n.content.substring(0,200))}${n.content.length>200?'...':''}</blockquote>`).join('')}</div>` : ''}
+        </article>`;
+      }).join('')}
+    </div>
+  </section>`;
+});
+
+// Build graph SVG
+const graphWidth = 800, graphHeight = 600;
+let graphSVG = '';
+if(db.entities.length > 0 && db.entities.length <= 100) {
+  const nodes = db.entities.map((e,i) => {
+    const angle = (2*Math.PI*i)/db.entities.length;
+    const r = Math.min(graphWidth,graphHeight)*0.4;
+    return {id:e.id,x:graphWidth/2+r*Math.cos(angle),y:graphHeight/2+r*Math.sin(angle),name:e.name,type:e.type,role:e.role};
+  });
+  let edges = db.relations.map(r => {
+    const f = nodes.find(n=>n.id===r.from), t = nodes.find(n=>n.id===r.to);
+    return f&&t ? `<line x1="${f.x}" y1="${f.y}" x2="${t.x}" y2="${t.y}" stroke="#3a3d45" stroke-width="1"/>` : '';
+  }).join('');
+  let nodesSVG = nodes.map(n => `
+    <g class="node" transform="translate(${n.x},${n.y})">
+      <circle r="20" fill="${n.role?roleColors[n.role]:typeColors[n.type]||'#71717a'}" stroke="${n.role?roleColors[n.role]:'none'}" stroke-width="3"/>
+      <text y="35" text-anchor="middle" fill="#e4e4e7" font-size="10">${esc(n.name.substring(0,12))}</text>
+    </g>
+  `).join('');
+  graphSVG = `<svg viewBox="0 0 ${graphWidth} ${graphHeight}" class="graph-svg">${edges}${nodesSVG}</svg>`;
+}
+
+const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)} — NEXUS Universe</title>
+<style>
+:root{--bg:#0f0f12;--surface:#1a1b1f;--card:#222328;--border:#3a3d45;--text:#e4e4e7;--muted:#9ca3af;--accent:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+header.hero{text-align:center;padding:60px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%);border-bottom:1px solid var(--border)}
+header.hero h1{font-size:3rem;margin-bottom:10px;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header.hero p{color:var(--muted);font-size:1.1rem}
+.stats{display:flex;justify-content:center;gap:30px;margin-top:30px;flex-wrap:wrap}
+.stat{background:var(--card);padding:20px 30px;border-radius:12px;text-align:center;border:1px solid var(--border)}
+.stat-value{font-size:2rem;font-weight:700;color:var(--accent)}.stat-label{font-size:0.85rem;color:var(--muted)}
+nav.toc{background:var(--surface);padding:20px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+nav.toc ul{display:flex;justify-content:center;gap:20px;list-style:none;flex-wrap:wrap}
+nav.toc a{color:var(--text);padding:8px 16px;border-radius:6px;transition:background 0.2s}
+nav.toc a:hover{background:var(--card);text-decoration:none}
+.type-section{margin:40px 0}
+.type-section h2{font-size:1.5rem;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.type-section h2 .count{color:var(--muted);font-weight:400;font-size:1rem}
+.entity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:20px}
+.entity-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;transition:transform 0.2s,box-shadow 0.2s}
+.entity-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.3)}
+.entity-card header{margin-bottom:12px}
+.entity-card h3{font-size:1.2rem;margin-bottom:8px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:0.7rem;padding:3px 8px;border-radius:4px;text-transform:uppercase;font-weight:600}
+.alias{font-size:0.85rem;color:var(--muted);font-style:italic;margin-bottom:8px}
+.desc{font-size:0.9rem;margin-bottom:10px}
+.date{font-size:0.85rem;color:var(--muted);margin-bottom:8px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tag{font-size:0.75rem;background:var(--surface);padding:3px 8px;border-radius:4px;color:var(--muted)}
+.relations{margin-top:12px;font-size:0.85rem}
+.relations ul{margin-top:6px;padding-left:20px}
+.relations li{margin:4px 0}
+.notes{margin-top:12px;font-size:0.85rem}
+.notes blockquote{background:var(--surface);padding:10px;border-radius:6px;margin-top:8px;border-left:3px solid var(--accent)}
+.graph-section{margin:40px 0;text-align:center}
+.graph-section h2{margin-bottom:20px}
+.graph-svg{background:var(--card);border-radius:12px;border:1px solid var(--border);max-width:100%;height:auto}
+footer{text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;border-top:1px solid var(--border);margin-top:40px}
+@media(max-width:768px){
+  header.hero h1{font-size:2rem}
+  .stats{gap:15px}
+  .stat{padding:15px 20px}
+  .entity-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>◈ ${esc(title)}</h1>
+  <p>Univers généré par NEXUS Intelligence Workbench</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-value">${stats.entities}</div><div class="stat-label">Entités</div></div>
+    <div class="stat"><div class="stat-value">${stats.relations}</div><div class="stat-label">Relations</div></div>
+    <div class="stat"><div class="stat-value">${stats.notes}</div><div class="stat-label">Notes</div></div>
+    <div class="stat"><div class="stat-value">${stats.roles.ally}</div><div class="stat-label">Alliés</div></div>
+    <div class="stat"><div class="stat-value">${stats.roles.adversary}</div><div class="stat-label">Adversaires</div></div>
+  </div>
+</header>
+<nav class="toc">
+  <ul>
+    ${Object.keys(byType).sort().map(t => `<li><a href="#type-${t}">${typeIcons[t]||'📦'} ${t}s (${byType[t].length})</a></li>`).join('')}
+    ${db.entities.length <= 100 ? '<li><a href="#graph">🕸️ Graphe</a></li>' : ''}
+  </ul>
+</nav>
+<main class="container">
+  ${entitySections}
+  ${graphSVG ? `<section class="graph-section" id="graph"><h2>🕸️ Graphe des Relations</h2>${graphSVG}</section>` : ''}
+</main>
+<footer>
+  <p>Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')} — NEXUS Intelligence Workbench v2</p>
+</footer>
+</body>
+</html>`;
+
+downloadFile(html, title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'-universe.html', 'text/html');
+toast('Univers HTML exporté!');
+}
+function downloadFile(c,fn,t){const b=new Blob([c],{type:t}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
+
+// UTILS
+function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,9);}
+function esc(s){if(!s)return'';return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeAllModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));}
+function lockDB(){toast('🔒 À implémenter');}
+function toast(m){const e=document.querySelector('.toast');if(e)e.remove();const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+</script>
+</body>
+</html>
